@@ -9,17 +9,13 @@ class Chatmessage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(
-      // Align the user's message to the right
       mainAxisAlignment:
           sender == "User" ? MainAxisAlignment.end : MainAxisAlignment.start,
-      crossAxisAlignment:
-          CrossAxisAlignment.start, // Align avatar and text at the top
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (sender != "User") // Show avatar only for MediBot (left side)
+        if (sender != "User")
           Container(
-            margin: const EdgeInsets.only(
-              right: 8,
-            ), // Space between avatar and text
+            margin: const EdgeInsets.only(right: 8),
             child: CircleAvatar(child: Text(sender[0])),
           ),
         Flexible(
@@ -49,11 +45,9 @@ class Chatmessage extends StatelessWidget {
             ],
           ),
         ),
-        if (sender == "User") // Show avatar only for the user (right side)
+        if (sender == "User")
           Container(
-            margin: const EdgeInsets.only(
-              left: 8,
-            ), // Space between text and avatar
+            margin: const EdgeInsets.only(left: 8),
             child: CircleAvatar(child: Text(sender[0])),
           ),
       ],

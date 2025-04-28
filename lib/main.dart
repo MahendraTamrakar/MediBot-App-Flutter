@@ -1,16 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:medibot/chat_screen.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized(); // Ensure bindings are initialized
-
-  try {
+  WidgetsFlutterBinding.ensureInitialized();
+  /* try {
     await dotenv.load(fileName: ".env");
-    print("✅ .env file loaded successfully!");
+    log("✅ .env file loaded successfully!");
   } catch (e) {
-    print("❌ Error loading .env file: $e"); // Debugging output
-  }
+    log("❌ Error loading .env file: $e");
+  } */
 
   runApp(const MyApp());
 }

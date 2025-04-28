@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:medibot/chatmessage.dart';
 import 'package:velocity_x/velocity_x.dart';
-import 'package:medibot/gemini_service.dart';
 import 'dart:math'; // For Random()
+
+import 'package:medibot/services/chat_service.dart';
 
 class ChatScreen extends StatefulWidget {
   const ChatScreen({super.key});
@@ -17,7 +18,6 @@ class _ChatScreenState extends State<ChatScreen> {
   bool _isTyping = false; // Indicator for "MediBot is typing..."
   bool _hasChatStarted = false; // Track if the chat has started
 
-  // List of greeting messages
   final List<String> _greetings = [
     "Hello! I'm MediBot, your personal health assistant. How can I help you today?",
     "Hi there! I'm here to assist with your health-related questions. What's on your mind?",
@@ -29,11 +29,29 @@ class _ChatScreenState extends State<ChatScreen> {
   ];
 
   String _currentGreeting = ""; // Current greeting message
+  final FocusNode _focusNode =
+      FocusNode(); // FocusNode to detect text field focus
 
   @override
   void initState() {
     super.initState();
     _refreshChat(); // Set initial greeting when the screen loads
+
+    // Listen for focus changes on the text field
+    _focusNode.addListener(() {
+      if (_focusNode.hasFocus) {
+        setState(() {
+          _hasChatStarted =
+              true; // Hide image and greeting when text field is focused
+        });
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _focusNode.dispose(); // Dispose the FocusNode
+    super.dispose();
   }
 
   void _refreshChat() {
@@ -66,8 +84,8 @@ class _ChatScreenState extends State<ChatScreen> {
 
     // Run Gemini API call in a background task
     Future.microtask(() async {
-      GeminiService geminiService = GeminiService();
-      String botResponse = await geminiService.getGeminiResponse(userMessage);
+      String botResponse = await ChatService().getBotResponse(userMessage);
+
       print("Bot Response: $botResponse"); // Debugging output
 
       if (!mounted) return;
@@ -89,6 +107,7 @@ class _ChatScreenState extends State<ChatScreen> {
             color: const Color.fromARGB(255, 14, 14, 14),
             child: TextField(
               controller: _controller,
+              focusNode: _focusNode, // Assign FocusNode to the text field
               onSubmitted: (value) => _sendMessage(),
               decoration: InputDecoration(
                 hintText: "Message MediBot",
@@ -150,18 +169,18 @@ class _ChatScreenState extends State<ChatScreen> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Image.asset(
-                          'assets/home_screen/Goku-70-1.png', // Replace with your image path
-                          width: 200,
-                          height: 220,
-                          fit: BoxFit.contain,
+                          'assets/home_screen/medical-team.png', // Replace with your image path
+                          width: 120,
+                          height: 110,
+                          fit: BoxFit.fitHeight,
                         ),
-                        SizedBox(height: 20), // Spacing between image and text
+                        SizedBox(height: 10), // Spacing between image and text
                         Text(
                           _currentGreeting, // Display the random greeting
                           style: TextStyle(
-                            color: const Color.fromARGB(255, 221, 220, 220),
-                            fontSize: 21,
-                            fontWeight: FontWeight.w800,
+                            color: const Color.fromARGB(255, 224, 223, 223),
+                            fontSize: 13,
+                            fontWeight: FontWeight.w900,
                           ),
                           textAlign: TextAlign.center,
                         ),
