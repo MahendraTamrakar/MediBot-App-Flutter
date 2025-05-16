@@ -121,6 +121,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   vertical: 12,
                   horizontal: 20,
                 ),
+
                 suffixIcon: IconButton(
                   icon: Icon(Icons.send, color: Colors.white),
                   onPressed: () => _sendMessage(),
