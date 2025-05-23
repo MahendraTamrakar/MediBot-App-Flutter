@@ -3,13 +3,6 @@ import 'package:medibot/chat_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  /* try {
-    await dotenv.load(fileName: ".env");
-    log("✅ .env file loaded successfully!");
-  } catch (e) {
-    log("❌ Error loading .env file: $e");
-  } */
-
   runApp(const MyApp());
 }
 

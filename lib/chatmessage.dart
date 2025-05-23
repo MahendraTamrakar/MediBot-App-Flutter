@@ -16,7 +16,11 @@ class Chatmessage extends StatelessWidget {
         if (sender != "User")
           Container(
             margin: const EdgeInsets.only(right: 8),
-            child: CircleAvatar(child: Text(sender[0])),
+            child: CircleAvatar(
+              backgroundColor: Colors.transparent,
+              backgroundImage: AssetImage('assets/icons/app.png'),
+              radius: 20,
+            ),
           ),
         Flexible(
           child: Column(
@@ -36,7 +40,7 @@ class Chatmessage extends StatelessWidget {
               ),
               // Message text
               Container(
-                margin: const EdgeInsets.only(top: 4),
+                margin: const EdgeInsets.only(top: 6),
                 child: Text(
                   text,
                   style: TextStyle(color: Colors.white, fontSize: 14),
