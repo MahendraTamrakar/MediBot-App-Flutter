@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "419672455128",
+    "project_id": "medibot-fa365",
+    "storage_bucket": "medibot-fa365.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:419672455128:android:bc9a7aaffc345bf5fce4ad",
+        "android_client_info": {
+          "package_name": "com.example.medibot"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "419672455128-bh18mm779cda5iah0gsf3oo4vc4a5j9m.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.medibot",
+            "certificate_hash": "c9095a9717e702d15169698133c85d0869cb9f69"
+          }
+        },
+        {
+          "client_id": "419672455128-cqvoeffvfgbh24vc3laiv6dqh95ma551.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAtPymrJgJXB4U1Q6K77QeyxtoOXSZbh7w"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "419672455128-cqvoeffvfgbh24vc3laiv6dqh95ma551.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
