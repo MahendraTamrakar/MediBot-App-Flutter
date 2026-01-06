@@ -1,3 +1,5 @@
+import 'dart:developer' show log;
+
 import 'package:dio/dio.dart';
 import 'package:medibot/data/models/auth/signup_resquest.dart';
 import 'api_client.dart';
@@ -152,14 +154,44 @@ class AuthApiService {
   /// Response: 200 OK (no body)
   Future<void> sendPasswordResetEmail(String email) async {
     try {
-      await _apiClient.post(
+      final response = await _apiClient.post(
         '/auth/forgot-password',
         data: {'email': email},
       );
+
+      if (response.statusCode == 200 || response.statusCode == 204) {
+        log('✅ Password reset email sent successfully');
+        return;
+      }
+
+      // Handle errors
+      final data = response.data;
+      final message = data is Map ? data['message'] ?? data['error'] : null;
+
+      if (response.statusCode == 400) {
+        throw Exception(message ?? 'Invalid email address');
+      } else if (response.statusCode == 404) {
+        throw Exception(message ?? 'Email not found');
+      } else if (response.statusCode == 429) {
+        throw Exception(message ?? 'Too many requests. Please try again later');
+      } else {
+        throw Exception(message ?? 'Failed to send reset email');
+      }
     } on DioException catch (e) {
-      throw _handleError(e);
+      if (e.type == DioExceptionType.connectionTimeout ||
+          e.type == DioExceptionType.receiveTimeout) {
+        throw Exception('Connection timeout. Please check your internet connection');
+      } else if (e.type == DioExceptionType.connectionError) {
+        throw Exception('No internet connection');
+      } else {
+        throw Exception('Network error: ${e.message}');
+      }
+    } catch (e) {
+      log('❌ Password reset error: $e');
+      rethrow;
     }
   }
+
 
   // ══════════════════════════════════════════════════════════════════════════
   // TOKEN REFRESH (Optional - if your backend supports it)

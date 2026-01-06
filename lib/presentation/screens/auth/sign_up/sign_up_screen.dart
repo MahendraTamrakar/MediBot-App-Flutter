@@ -20,7 +20,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  bool _obscurePassword = true;
   bool _isLoading = false;
 
   @override
@@ -73,10 +72,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
     }
   }
 
-  // ══════════════════════════════════════════════════════════════════════════
-  // SIGN IN WITH GOOGLE
-  // ══════════════════════════════════════════════════════════════════════════
-
+  // Sign in through google
   Future<void> _signInWithGoogle() async {
     try {
       final authProvider = context.read<AuthProvider>();
@@ -120,167 +116,164 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
     return Scaffold(
       resizeToAvoidBottomInset: true,
-      backgroundColor: const Color.fromARGB(255, 255, 255, 255),
-      body: SafeArea(
-        child: Stack(
-          children: [
-            Positioned(
-              top: 0,
-              left: 0,
-              right: 0,
-              height: size.height,
-              child: SvgPicture.asset(
-                'assets/images/signup.svg',
-                fit: BoxFit.cover,
-                alignment: Alignment.topCenter,
-              ),
+      body: Stack(
+        children: [
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            height: size.height,
+            child: SvgPicture.asset(
+              'assets/images/signup.svg',
+              fit: BoxFit.cover,
+              alignment: Alignment.topCenter,
             ),
-
-            
-            Align(
-              alignment: Alignment.bottomCenter,
-              child: Container(
-                constraints: BoxConstraints(
-                  maxHeight: size.height * 0.75,
-                  minHeight: size.height * 0.5,
-                ),
-                child: SingleChildScrollView(
-                  child: Container(
-                    margin: const EdgeInsets.fromLTRB(10, 10, 10, 20),
-                    padding: const EdgeInsets.fromLTRB(20, 25, 20, 25),
-                    decoration: BoxDecoration(
-                      color: theme.scaffoldBackgroundColor,
-                      borderRadius: BorderRadius.circular(40),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.1),
-                          blurRadius: 10,
-                          offset: const Offset(0, -5),
+          ),
+      
+          
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: Container(
+              constraints: BoxConstraints(
+                maxHeight: size.height * 0.75,
+                minHeight: size.height * 0.5,
+              ),
+              child: SingleChildScrollView(
+                child: Container(
+                  margin: const EdgeInsets.fromLTRB(10, 10, 10, 20),
+                  padding: const EdgeInsets.fromLTRB(20, 25, 20, 25),
+                  decoration: BoxDecoration(
+                    color: theme.scaffoldBackgroundColor,
+                    borderRadius: BorderRadius.circular(40),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.1),
+                        blurRadius: 10,
+                        offset: const Offset(0, -5),
+                      ),
+                    ],
+                  ),
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          "Create An Account",
+                          style: TextStyle(
+                            fontSize: 32,
+                            fontWeight: FontWeight.w900,
+                            fontFamily: 'cursive',
+                            color: theme.brightness == Brightness.dark
+                                ? Colors.white
+                                : theme.primaryColor,
+                          ),
+                        ),
+      
+                        const SizedBox(height: 20),
+      
+                        CustomTextField(
+                          controller: _emailController,
+                          label: 'Email',
+                          hint: 'Enter your email',
+                          keyboardType: TextInputType.emailAddress,
+                          prefixIcon: const Icon(Icons.email_outlined),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter your email';
+                            }
+                            if (!value.contains('@')) {
+                              return 'Please enter a valid email';
+                            }
+                            return null;
+                          },
+                        ),
+      
+                        const SizedBox(height: 18),
+      
+                        PasswordField(
+                          controller: _passwordController,
+                          label: 'Password',
+                          hint: 'Enter your password',
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter your password';
+                            }
+                            if (value.length < 6) {
+                              return 'Password must be at least 6 characters';
+                            }
+                            return null;
+                          },
+                        ),
+                        
+                        const SizedBox(height: 20),
+      
+                        Consumer<AuthProvider>(
+                          builder: (context, authProvider, child) {
+                            final isLoading =
+                                authProvider.isLoading || _isLoading;
+      
+                            return isLoading
+                                ? const LoadingIndicator()
+                                : PrimaryButton(
+                                    text: 'Sign Up',
+                                    onPressed: _registerWithEmail,
+                                    isLoading: authProvider.isLoading,
+                                  );
+                          },
+                        ),
+      
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text("Already have an account?",
+                              style: TextStyle(
+                                color: theme.brightness == Brightness.dark
+                                    ? Colors.grey[400]
+                                    : Colors.grey[700],
+                              ),),
+                            TextButton(
+                              onPressed: () {
+                                Navigator.pushReplacementNamed(
+                                  context,
+                                  AppRoutes.signIn,
+                                );
+                              },
+                              child: Text(
+                                "Sign In",
+                                style: TextStyle(fontWeight: FontWeight.bold,color: theme.primaryColor),
+                              ),
+                            ),
+                          ],
+                        ),
+      
+                        const Text(
+                          "or",
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+      
+                        const SizedBox(height: 10),
+      
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            IconButton(
+                              onPressed: _signInWithGoogle,
+                              icon: Image.asset(
+                                'assets/images/google.png',
+                                width: 48,
+                              ),
+                            ),
+                          ],
                         ),
                       ],
-                    ),
-                    child: Form(
-                      key: _formKey,
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            "Create An Account",
-                            style: TextStyle(
-                              fontSize: 32,
-                              fontWeight: FontWeight.bold,
-                              fontFamily: 'cursive',
-                              color: theme.brightness == Brightness.dark
-                                  ? Colors.white
-                                  : theme.primaryColor,
-                            ),
-                          ),
-
-                          const SizedBox(height: 20),
-
-                          CustomTextField(
-                            controller: _emailController,
-                            label: 'Email',
-                            hint: 'Enter your email',
-                            keyboardType: TextInputType.emailAddress,
-                            prefixIcon: const Icon(Icons.email_outlined),
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Please enter your email';
-                              }
-                              if (!value.contains('@')) {
-                                return 'Please enter a valid email';
-                              }
-                              return null;
-                            },
-                          ),
-
-                          const SizedBox(height: 18),
-
-                          PasswordField(
-                            controller: _passwordController,
-                            label: 'Password',
-                            hint: 'Enter your password',
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Please enter your password';
-                              }
-                              if (value.length < 6) {
-                                return 'Password must be at least 6 characters';
-                              }
-                              return null;
-                            },
-                          ),
-                          
-                          const SizedBox(height: 20),
-
-                          Consumer<AuthProvider>(
-                            builder: (context, authProvider, child) {
-                              final isLoading =
-                                  authProvider.isLoading || _isLoading;
-
-                              return isLoading
-                                  ? const LoadingIndicator()
-                                  : PrimaryButton(
-                                      text: 'Sign Up',
-                                      onPressed: _registerWithEmail,
-                                      isLoading: authProvider.isLoading,
-                                    );
-                            },
-                          ),
-
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text("Already have an account?",
-                                style: TextStyle(
-                                  color: theme.brightness == Brightness.dark
-                                      ? Colors.grey[400]
-                                      : Colors.grey[700],
-                                ),),
-                              TextButton(
-                                onPressed: () {
-                                  Navigator.pushReplacementNamed(
-                                    context,
-                                    AppRoutes.signIn,
-                                  );
-                                },
-                                child: Text(
-                                  "Sign in",
-                                  style: TextStyle(fontWeight: FontWeight.bold,color: theme.primaryColor),
-                                ),
-                              ),
-                            ],
-                          ),
-
-                          const Text(
-                            "or",
-                            style: TextStyle(fontWeight: FontWeight.bold),
-                          ),
-
-                          const SizedBox(height: 10),
-
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              IconButton(
-                                onPressed: _signInWithGoogle,
-                                icon: Image.asset(
-                                  'assets/images/google.png',
-                                  width: 48,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
                     ),
                   ),
                 ),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:medibot/presentation/theme/app_theme.dart';
 
 /// Custom text field with consistent styling
 class CustomTextField extends StatelessWidget {
@@ -40,8 +41,19 @@ class CustomTextField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final borderColor = enabled ? Colors.grey.shade300 : Colors.grey.shade200;
+    final isDarkTheme = theme.brightness == Brightness.dark;
+    
+    // Theme-based colors
+    final borderColor = isDarkTheme 
+        ? AppTheme.borderColorDark 
+        : AppTheme.borderColor;
     final focusedBorderColor = theme.primaryColor;
+    final labelColor = isDarkTheme 
+        ? AppTheme.textSecondaryDark 
+        : AppTheme.textSecondary;
+    final fillColor = isDarkTheme 
+        ? const Color.fromARGB(255, 84, 83, 83) 
+        : AppTheme.surfaceColor;
 
     return TextFormField(
       controller: controller,
@@ -61,7 +73,7 @@ class CustomTextField extends StatelessWidget {
         prefixIcon: prefixIcon,
         suffixIcon: suffixIcon,
         labelStyle: TextStyle(
-          color: borderColor,
+          color: labelColor,
         ),
         floatingLabelStyle: TextStyle(
           color: focusedBorderColor,
@@ -89,7 +101,7 @@ class CustomTextField extends StatelessWidget {
           ),
         ),
         filled: true,
-        fillColor: enabled ? const Color.fromARGB(178, 73, 73, 73) : Colors.grey.shade100,
+        fillColor: enabled ? fillColor : (isDarkTheme ? Colors.grey.shade700 : Colors.grey.shade100),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 16,
           vertical: 16,

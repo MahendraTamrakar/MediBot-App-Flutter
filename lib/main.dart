@@ -156,25 +156,7 @@ class _InitialScreenState extends State<InitialScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.medical_services,
-              size: 80,
-              color: Theme.of(context).primaryColor,
-            ),
-            const SizedBox(height: 24),
-            Text(
-              'MediBot',
-              style: Theme.of(context).textTheme.displayMedium,
-            ),
-            const SizedBox(height: 48),
-            const CircularProgressIndicator(),
-          ],
-        ),
-      ),
+      body: const SizedBox.shrink(),
     );
   }
 }

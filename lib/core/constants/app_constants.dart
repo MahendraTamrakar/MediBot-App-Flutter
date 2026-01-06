@@ -4,6 +4,7 @@ class AppColors {
   // Brand Colors
   static const Color primary = Color.fromARGB(228, 30, 106, 236);
   static const Color primaryDark = Color.fromARGB(229, 241, 69, 69);
+
   
   // Light Theme Colors
   static const Color lightBackground = Color(0xFFFFFFFF);

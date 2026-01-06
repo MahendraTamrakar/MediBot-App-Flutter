@@ -185,12 +185,29 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
-  // ══════════════════════════════════════════════════════════════════════════
-  // GOOGLE SIGN IN
-  // ══════════════════════════════════════════════════════════════════════════
+  //forgot password
+  Future<void> sendPasswordResetEmail(String email) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      await _authRepository.sendPasswordResetEmail(email);
+      log('✅ Password reset email sent to: $email');
+      
+      _isLoading = false;
+      notifyListeners();
+    } catch (e) {
+      log('❌ Password reset error: $e');
+      _errorMessage = e.toString();
+      _isLoading = false;
+      notifyListeners();
+      rethrow;
+    }
+  }
+
 
   /// Sign in with Google
-  ///
   /// Returns UserModel on success, null if cancelled, throws on error
   Future<UserModel?> signInWithGoogle() async {
     _isLoading = true;
