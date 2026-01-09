@@ -51,8 +51,11 @@ class ChatApiService {
   /// ```
   Stream<String> analyzeSymptomsStream(ChatRequest request) async* {
     try {
+      log('🔄 Starting stream request to ${ApiConstants.analyzeSymptoms}');
+      log('📤 Request data: ${request.toJson()}');
+      
       final response = await _apiClient.post(
-        ApiConstants.analyzeSymptomsStream,
+        ApiConstants.analyzeSymptoms,
         data: request.toJson(),
         // Configure for SSE streaming
         options: Options(
@@ -65,41 +68,97 @@ class ChatApiService {
         ),
       );
 
+      log('✅ Stream response received, status: ${response.statusCode}');
+      log('📥 Response headers: ${response.headers}');
+
       // Parse SSE stream
       final stream = response.data.stream;
+      String buffer = '';
 
       await for (final chunk in stream) {
-        final lines = String.fromCharCodes(chunk).split('\n');
+        final chunkStr = String.fromCharCodes(chunk);
+        log('📦 Chunk received: $chunkStr');
+        
+        buffer += chunkStr;
+        final lines = buffer.split('\n');
+        
+        // Keep the last incomplete line in the buffer
+        buffer = lines.removeLast();
 
         for (final line in lines) {
+          log('📝 Processing line: $line');
+          
           if (line.startsWith('data: ')) {
             final data = line.substring(6).trim();
 
             if (data.isNotEmpty && data != '[DONE]') {
               try {
                 final json = jsonDecode(data);
+                log('📊 Parsed JSON: $json');
 
                 // Handle different event types
                 if (json.containsKey('token')) {
                   yield json['token'] as String;
+                } else if (json.containsKey('content')) {
+                  // Alternative format: content field
+                  yield json['content'] as String;
+                } else if (json.containsKey('text')) {
+                  // Alternative format: text field
+                  yield json['text'] as String;
                 } else if (json.containsKey('session')) {
                   // Session info (new chat)
-                  // You can handle this separately if needed
+                  log('📋 Session info: ${json['session']}');
                 } else if (json.containsKey('done')) {
                   // Stream complete
-                  break;
+                  log('✅ Stream complete signal received');
+                  return;
                 } else if (json.containsKey('error')) {
                   throw Exception(json['error']);
                 }
               } catch (e) {
-                log('Error parsing SSE data: $e');
+                // If JSON parsing fails, maybe it's plain text
+                log('⚠️ JSON parse failed, trying as plain text: $data');
+                if (data.isNotEmpty) {
+                  yield data;
+                }
               }
+            }
+          } else if (line.isNotEmpty && !line.startsWith(':')) {
+            // Non-SSE format - might be plain text streaming
+            log('📝 Non-SSE line: $line');
+            yield line;
+          }
+        }
+      }
+      
+      // Process any remaining buffer
+      if (buffer.isNotEmpty) {
+        log('📦 Processing remaining buffer: $buffer');
+        if (buffer.startsWith('data: ')) {
+          final data = buffer.substring(6).trim();
+          if (data.isNotEmpty && data != '[DONE]') {
+            try {
+              final json = jsonDecode(data);
+              if (json.containsKey('token')) {
+                yield json['token'] as String;
+              } else if (json.containsKey('content')) {
+                yield json['content'] as String;
+              }
+            } catch (e) {
+              yield data;
             }
           }
         }
       }
+      
+      log('✅ Stream processing complete');
     } on DioException catch (e) {
+      log('❌ DioException in stream: ${e.message}');
+      log('❌ Response: ${e.response?.data}');
       throw _handleError(e);
+    } catch (e) {
+      log('❌ Unexpected error in stream: $e');
+      rethrow;
     }
   }
 
@@ -213,7 +272,21 @@ class ChatApiService {
       String message = 'An error occurred';
 
       if (data is Map<String, dynamic>) {
-        message = data['detail'] ?? data['message'] ?? message;
+        // Handle FastAPI validation errors (422) which return detail as a list
+        final detail = data['detail'];
+        if (detail is List) {
+          // Extract validation error messages
+          message = detail.map((e) {
+            if (e is Map<String, dynamic>) {
+              return e['msg'] ?? e['message'] ?? e.toString();
+            }
+            return e.toString();
+          }).join(', ');
+        } else if (detail is String) {
+          message = detail;
+        } else if (data['message'] is String) {
+          message = data['message'];
+        }
       } else if (data is String) {
         message = data;
       }
@@ -225,6 +298,8 @@ class ChatApiService {
           return 'Unauthorized. Please login again.';
         case 404:
           return 'Chat session not found';
+        case 422:
+          return 'Validation error: $message';
         case 500:
           return 'Server error. Please try again later.';
         default:

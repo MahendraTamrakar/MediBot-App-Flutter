@@ -32,10 +32,6 @@ class NavigationService {
   /// Get navigator state
   static NavigatorState? get navigator => navigatorKey.currentState;
 
-  // ══════════════════════════════════════════════════════════════════════════
-  // NAVIGATION METHODS
-  // ══════════════════════════════════════════════════════════════════════════
-
   /// Navigate to route (push)
   static Future<T?> navigateTo<T>(
     String routeName, {
@@ -105,9 +101,7 @@ class NavigationService {
     navigator!.popUntil(predicate);
   }
 
-  // ══════════════════════════════════════════════════════════════════════════
-  // DIALOG METHODS
-  // ══════════════════════════════════════════════════════════════════════════
+
 
   /// Show dialog
   static Future<T?> showDialogBox<T>(Widget dialog) {
@@ -124,10 +118,6 @@ class NavigationService {
       builder: (_) => bottomSheet,
     );
   }
-
-  // ══════════════════════════════════════════════════════════════════════════
-  // SNACKBAR METHODS
-  // ══════════════════════════════════════════════════════════════════════════
 
   /// Show snackbar
   static void showSnackbar(String message, {Color? backgroundColor}) {

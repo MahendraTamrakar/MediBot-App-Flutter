@@ -5,9 +5,12 @@ ThemeData getLightTheme() {
   return ThemeData(
     useMaterial3: true,
     brightness: Brightness.light,
-    primaryColor:Color.fromARGB(228, 30, 106, 236),
+    primaryColor: Color.fromARGB(228, 30, 106, 236),
     scaffoldBackgroundColor: AppColors.lightBackground,
-    
+    cardColor: const Color.fromRGBO(255, 255, 255, 1),
+    iconTheme: const IconThemeData(color: AppColors.lightIconColor),
+
+
     // Color Scheme
     colorScheme: const ColorScheme.light(
       primary: Color.fromARGB(228, 30, 106, 236),
@@ -29,7 +32,8 @@ ThemeData getLightTheme() {
     appBarTheme: const AppBarTheme(
       backgroundColor: AppColors.lightBackground,
       elevation: 0,
-      iconTheme: IconThemeData(color: AppColors.lightTextPrimary),
+      iconTheme: IconThemeData(color: AppColors.lightIconColor),
+      actionsIconTheme: IconThemeData(color: AppColors.lightIconColor),
       titleTextStyle: TextStyle(
         color: AppColors.lightTextPrimary,
         fontSize: 18,

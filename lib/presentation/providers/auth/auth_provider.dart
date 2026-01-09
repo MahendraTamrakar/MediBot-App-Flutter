@@ -138,6 +138,7 @@ class AuthProvider extends ChangeNotifier {
     try {
       final user = await _authRepository.signIn(email, password);
       _currentUser = user;
+      _isInitializing = false; // Ensure initialization is complete
       log('✅ Sign in successful: ${user.email}');
 
       _isLoading = false;
@@ -169,6 +170,7 @@ class AuthProvider extends ChangeNotifier {
     try {
       final user = await _authRepository.signUp(email, password);
       _currentUser = user;
+      _isInitializing = false; // Ensure initialization is complete
       log('✅ Sign up successful: ${user.email}');
 
       _isLoading = false;
@@ -217,6 +219,7 @@ class AuthProvider extends ChangeNotifier {
     try {
       final user = await _authRepository.signInWithGoogle();
       _currentUser = user;
+      _isInitializing = false; // Ensure initialization is complete
       log('✅ Google sign in successful: ${user.email}');
 
       _isLoading = false;

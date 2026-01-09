@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:medibot/presentation/common_widgets/buttons/primary_buttons.dart';
 import 'package:medibot/presentation/common_widgets/input/custom_text_field.dart';
@@ -18,12 +19,23 @@ class _ForgotScreenState extends State<ForgotScreen> {
   final _emailController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   bool _isLoading = false;
-  bool _emailSent = false;  // ← This toggles between two UIs
+  bool _emailSent = false; 
 
   @override
   void dispose() {
     _emailController.dispose();
     super.dispose();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    SystemChrome.setSystemUIOverlayStyle(
+      const SystemUiOverlayStyle(
+        statusBarBrightness: Brightness.light,
+        statusBarIconBrightness: Brightness.light,
+      ),
+    );
   }
 
   Future<void> _sendResetEmail() async {
@@ -92,9 +104,6 @@ class _ForgotScreenState extends State<ForgotScreen> {
     );
   }
 
-  // ══════════════════════════════════════════════════════════════════════════
-  // FORM UI (Your existing UI - First screen)
-  // ══════════════════════════════════════════════════════════════════════════
 
   Widget _buildFormUI(ThemeData theme, Size size) {
     return Form(

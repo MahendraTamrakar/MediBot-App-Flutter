@@ -25,7 +25,7 @@ class ChatRepository {
   /// Send a message and get response
   ///
   /// [message] - User's message/symptoms
-  /// [sessionId] - Optional session ID (creates new session if null)
+  /// [sessionId] - Optional session ID (backend creates new one if null)
   ///
   /// Returns ChatResponse with session info and AI response
   Future<ChatResponse> sendMessage({
@@ -33,7 +33,10 @@ class ChatRepository {
     String? sessionId,
   }) async {
     try {
-      final request = ChatRequest(sessionId: sessionId, symptoms: message);
+      final request = ChatRequest(
+        sessionId: sessionId,
+        symptoms: message,
+      );
 
       final response = await _chatApiService.analyzeSymptoms(request);
 
@@ -65,7 +68,10 @@ class ChatRepository {
     String? sessionId,
   }) async* {
     try {
-      final request = ChatRequest(sessionId: sessionId, symptoms: message);
+      final request = ChatRequest(
+        sessionId: sessionId,
+        symptoms: message,
+      );
 
       // Yield tokens from API service
       await for (final token in _chatApiService.analyzeSymptomsStream(

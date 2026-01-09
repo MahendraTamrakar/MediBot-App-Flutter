@@ -9,6 +9,7 @@ class ApiConstants {
   static String get backendUrl =>
       dotenv.env['BACKEND_URL'] ?? 'http://localhost:8000';
 
+
   // ════════════════════════════════════════════════════════════════════════════
   // AUTHENTICATION ENDPOINTS
   // ════════════════════════════════════════════════════════════════════════════
@@ -31,9 +32,6 @@ class ApiConstants {
 
   /// Analyze symptoms (non-streaming)
   static const String analyzeSymptoms = '/analyze-symptoms';
-
-  /// Analyze symptoms (streaming with SSE)
-  static const String analyzeSymptomsStream = '/analyze-symptoms/stream';
 
   /// Get all chat sessions
   static const String listChats = '/chats';

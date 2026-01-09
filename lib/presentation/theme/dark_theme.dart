@@ -7,6 +7,8 @@ ThemeData getDarkTheme() {
     brightness: Brightness.dark,
     primaryColor: Color.fromARGB(229, 241, 69, 69),
     scaffoldBackgroundColor: AppColors.darkBackground,
+    cardColor: AppColors.darkSurface,
+    iconTheme: const IconThemeData(color: AppColors.darkIconColor),
 
     // Color Scheme
     colorScheme: const ColorScheme.dark(
@@ -30,7 +32,8 @@ ThemeData getDarkTheme() {
     appBarTheme: const AppBarTheme(
       backgroundColor: AppColors.darkBackground,
       elevation: 0,
-      iconTheme: IconThemeData(color: AppColors.darkTextPrimary),
+      iconTheme: IconThemeData(color: AppColors.darkIconColor),
+      actionsIconTheme: IconThemeData(color: AppColors.darkIconColor),
       titleTextStyle: TextStyle(
         color: AppColors.darkTextPrimary,
         fontSize: 18,

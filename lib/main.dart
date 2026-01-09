@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:medibot/data/data_sources/remote/chat_api_service.dart';
+import 'package:medibot/data/repositories/chat_repository.dart';
 import 'package:medibot/presentation/navigation/auth_router.dart';
 import 'package:medibot/presentation/navigation/navigation_service.dart';
 import 'package:medibot/presentation/providers/auth/auth_provider.dart';
+import 'package:medibot/presentation/providers/chat/chat_provider.dart';
 import 'package:medibot/presentation/theme/dark_theme.dart';
 import 'package:medibot/presentation/theme/light_theme.dart';
 import 'package:provider/provider.dart';
@@ -53,6 +56,7 @@ void main() async {
   );
 
   final authApiService = AuthApiService(apiClient);
+  final chatApiService = ChatApiService(apiClient);
   final googleSignInService = GoogleSignInService();
 
   final authRepository = AuthRepository(
@@ -61,9 +65,15 @@ void main() async {
     googleSignIn: googleSignInService,
   );
 
+  final chatRepository = ChatRepository(
+    chatApiService: chatApiService,
+  );
+
   runApp(
     MyApp(
       authRepository: authRepository,
+      chatRepository: chatRepository,
+      secureStorage: secureStorage,
       connectivityService: connectivityService,
       onboardingStorage: onboardingStorage,
     ),
@@ -72,12 +82,16 @@ void main() async {
 
 class MyApp extends StatelessWidget {
   final AuthRepository authRepository;
+  final ChatRepository chatRepository;
+  final SecureStorageService secureStorage;
   final ConnectivityService connectivityService;
   final OnboardingStorage onboardingStorage;
 
   const MyApp({
     super.key,
     required this.authRepository,
+    required this.chatRepository,
+    required this.secureStorage,
     required this.connectivityService,
     required this.onboardingStorage,
   });
@@ -89,9 +103,13 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(
           create: (_) => AuthProvider(authRepository: authRepository),
         ),
+        ChangeNotifierProvider(
+          create: (_) => ChatProvider(chatRepository),
+        ),
         Provider<ConnectivityService>.value(value: connectivityService),
         Provider<OnboardingStorage>.value(value: onboardingStorage),
         Provider<AuthRepository>.value(value: authRepository),
+        Provider<ChatRepository>.value(value: chatRepository),
       ],
       child: MaterialApp(
         title: 'MediBot',
@@ -147,7 +165,7 @@ class _InitialScreenState extends State<InitialScreen> {
     if (!mounted) return;
 
     if (isLoggedIn) {
-      Navigator.pushReplacementNamed(context, AppRoutes.home);
+      Navigator.pushReplacementNamed(context, AppRoutes.chat);
     } else {
       Navigator.pushReplacementNamed(context, AppRoutes.signIn);
     }
@@ -155,8 +173,8 @@ class _InitialScreenState extends State<InitialScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: const SizedBox.shrink(),
+    return const Scaffold(
+      body: SizedBox.shrink(),
     );
   }
 }

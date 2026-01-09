@@ -64,6 +64,7 @@ dependencies:
   # Firebase Packages
   google_sign_in: ^6.2.1              # Google authentication
   flutter_svg: ^2.2.2
+  speech_to_text: ^7.3.0
   # Optional
   # firebase_analytics: ^10.8.0
   # firebase_crashlytics: ^3.4.8

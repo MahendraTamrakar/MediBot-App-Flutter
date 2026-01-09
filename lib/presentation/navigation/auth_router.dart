@@ -5,6 +5,8 @@ import 'package:medibot/presentation/navigation/route_guard.dart';
 import 'package:medibot/presentation/screens/auth/forgot_password/forgot_screen.dart';
 import 'package:medibot/presentation/screens/auth/sign_in/sign_in_screen.dart';
 import 'package:medibot/presentation/screens/auth/sign_up/sign_up_screen.dart';
+import 'package:medibot/presentation/screens/main/chat/chat_screen.dart';
+import 'package:medibot/presentation/screens/main/drawer/widgets/drawer_animation.dart';
 import 'package:medibot/presentation/screens/onboarding/onboarding_screen.dart';
 
 /// App Router - Centralized route management
@@ -63,14 +65,18 @@ class AppRouter {
           settings: settings,
         );
 
-      /* //main app routes
+       //main app routes
       
-      case AppRoutes.home:
+      case AppRoutes.chat:
         return MaterialPageRoute(
-          builder: (_) => const AuthGuard(child: HomeScreen()),
+          builder: (_) => AuthGuard(
+            child: AnimatedDrawerScaffold(
+              builder: (context, toggle) => ChatScreen(onMenuPressed: toggle),
+            ),
+          ),
           settings: settings,
         );
-
+      /*
       case AppRoutes.chat:
         // Get session ID from arguments (optional)
         final sessionId = settings.arguments as String?;
@@ -158,7 +164,7 @@ class AppRouter {
                     onPressed:
                         () => Navigator.pushReplacementNamed(
                           context,
-                          AppRoutes.home,
+                          AppRoutes.chat,
                         ),
                     child: const Text('Go to Home'),
                   ),
@@ -183,8 +189,6 @@ class AppRouter {
 /// - Auto-complete support
 /// - Single source of truth
 class AppRoutes {
-  // Splash & Onboarding
-  static const String splash = '/';
   static const String onboarding = '/onboarding';
 
   // Authentication
@@ -193,7 +197,6 @@ class AppRoutes {
   static const String forgotPassword = '/forgot-password';
 
   // Main App
-  static const String home = '/home';
   static const String chat = '/chat';
   static const String chatHistory = '/chat-history';
   static const String profile = '/profile';
@@ -205,7 +208,6 @@ class AppRoutes {
   /// Check if route requires authentication
   static bool isProtectedRoute(String route) {
     return ![
-      splash,
       onboarding,
       signIn,
       signUp,

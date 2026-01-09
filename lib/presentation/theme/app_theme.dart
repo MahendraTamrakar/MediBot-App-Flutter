@@ -34,14 +34,14 @@ class AppTheme {
   static const Color accentLight = Color(0xFFFF80AB);
 
   // Background colors (Light theme)
-  static const Color backgroundColor = Color(0xFFF5F5F5);
+  static const Color backgroundColor = Color.fromARGB(255, 238, 227, 227);
   static const Color surfaceColor = Colors.white;
   static const Color cardColor = Colors.white;
 
   // Background colors (Dark theme)
-  static const Color backgroundColorDark = Color(0xFF121212);
-  static const Color surfaceColorDark = Color(0xFF1E1E1E);
-  static const Color cardColorDark = Color(0xFF2C2C2C);
+  static const Color backgroundColorDark = Color(0xFF0E1117);
+  static const Color surfaceColorDark = Color(0xFF343541);
+  static const Color cardColorDark = Color(0xFF343541);
 
   // Text colors (Light theme)
   static const Color textPrimary = Color(0xFF212121);
@@ -95,7 +95,7 @@ class AppTheme {
       ),
 
   
-      scaffoldBackgroundColor: backgroundColor,
+      scaffoldBackgroundColor: const Color.fromARGB(255, 226, 223, 226),
 
      
       appBarTheme: const AppBarTheme(

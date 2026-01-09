@@ -31,10 +31,7 @@ class RouteConfig {
   // MAIN APP
   // ══════════════════════════════════════════════════════════════════════════
 
-  /// Home screen (chat screen)
-  static const String home = '/home';
 
-  /// Chat screen (alias for home)
   static const String chat = '/chat';
 
   /// Specific chat session
@@ -102,7 +99,6 @@ class RouteConfig {
       signIn,
       signUp,
       forgotPassword,
-      home,
       chat,
       settings,
       editProfile,
@@ -139,7 +135,6 @@ class RouteConfig {
         return 'Sign Up';
       case forgotPassword:
         return 'Forgot Password';
-      case home:
       case chat:
         return 'Chat';
       case settings:

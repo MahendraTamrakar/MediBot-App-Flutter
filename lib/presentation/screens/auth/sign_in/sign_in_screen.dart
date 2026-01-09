@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:medibot/presentation/common_widgets/input/custom_text_field.dart';
 import 'package:medibot/presentation/common_widgets/input/password_field.dart';
 import 'package:medibot/presentation/common_widgets/loaders/loading_indicator.dart';
@@ -50,7 +51,7 @@ class _SignInScreenState extends State<SignInScreen> {
         ),
       );
 
-      Navigator.pushReplacementNamed(context, AppRoutes.home);
+      Navigator.pushReplacementNamed(context, AppRoutes.chat);
     } catch (e) {
       if (!mounted) return;
 
@@ -88,7 +89,7 @@ class _SignInScreenState extends State<SignInScreen> {
       );
 
       // Navigate to home
-      Navigator.pushReplacementNamed(context, AppRoutes.home);
+      Navigator.pushReplacementNamed(context, AppRoutes.chat);
     } catch (e) {
       if (!mounted) return;
 
@@ -100,6 +101,17 @@ class _SignInScreenState extends State<SignInScreen> {
         ),
       );
     }
+  }
+
+   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    SystemChrome.setSystemUIOverlayStyle(
+      const SystemUiOverlayStyle(
+        statusBarBrightness: Brightness.light,
+        statusBarIconBrightness: Brightness.dark,
+      ),
+    );
   }
 
   @override
@@ -136,7 +148,9 @@ class _SignInScreenState extends State<SignInScreen> {
                   margin: const EdgeInsets.fromLTRB(10, 10, 10, 20),
                   padding: const EdgeInsets.fromLTRB(20, 25, 20, 25),
                   decoration: BoxDecoration(
-                    color: theme.scaffoldBackgroundColor,
+                    color: theme.brightness == Brightness.dark 
+                        ? const Color(0xFF343541) 
+                        : theme.scaffoldBackgroundColor,
                     borderRadius: BorderRadius.circular(40),
                     boxShadow: [
                       BoxShadow(

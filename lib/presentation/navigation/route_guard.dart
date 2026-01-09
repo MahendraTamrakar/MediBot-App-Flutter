@@ -5,15 +5,6 @@ import 'package:provider/provider.dart';
 
 
 /// Authentication guard
-/// 
-/// Wraps protected screens and redirects to sign in if not authenticated.
-/// 
-/// Usage:
-/// ```dart
-/// MaterialPageRoute(
-///   builder: (_) => const AuthGuard(child: HomeScreen()),
-/// )
-/// ```
 class AuthGuard extends StatelessWidget {
   final Widget child;
 
@@ -58,15 +49,7 @@ class AuthGuard extends StatelessWidget {
 }
 
 /// Guest guard (redirects authenticated users away from auth screens)
-/// 
-/// Wraps authentication screens and redirects to home if already logged in.
-/// 
-/// Usage:
-/// ```dart
-/// MaterialPageRoute(
-///   builder: (_) => const GuestGuard(child: SignInScreen()),
-/// )
-/// ```
+
 class GuestGuard extends StatelessWidget {
   final Widget child;
 
@@ -83,15 +66,9 @@ class GuestGuard extends StatelessWidget {
         if (authProvider.isAuthenticated) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (context.mounted) {
-              Navigator.pushReplacementNamed(context, AppRoutes.home);
+              Navigator.pushReplacementNamed(context, AppRoutes.chat);
             }
           });
-          
-          return const Scaffold(
-            body: Center(
-              child: CircularProgressIndicator(),
-            ),
-          );
         }
 
         // Not authenticated → show auth screen
@@ -102,15 +79,7 @@ class GuestGuard extends StatelessWidget {
 }
 
 /// Email verification guard
-/// 
-/// Wraps screens that require verified email and shows verification prompt.
-/// 
-/// Usage:
-/// ```dart
-/// MaterialPageRoute(
-///   builder: (_) => const EmailVerificationGuard(child: SensitiveScreen()),
-/// )
-/// ```
+
 class EmailVerificationGuard extends StatelessWidget {
   final Widget child;
 

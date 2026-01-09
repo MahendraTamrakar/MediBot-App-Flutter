@@ -1,15 +1,30 @@
 import 'dart:developer' show log;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:medibot/presentation/navigation/auth_router.dart';
-import 'package:medibot/presentation/navigation/navigation_service.dart';
-import 'package:medibot/presentation/screens/auth/sign_up/sign_up_screen.dart';
 import 'package:medibot/presentation/screens/onboarding/widgets/slider_action_button.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class OnboardingScreen extends StatelessWidget {
+class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
+
+  @override
+  State<OnboardingScreen> createState() => _OnboardingScreenState();
+}
+
+class _OnboardingScreenState extends State<OnboardingScreen> {
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    SystemChrome.setSystemUIOverlayStyle(
+      const SystemUiOverlayStyle(
+        statusBarBrightness: Brightness.light,
+        statusBarIconBrightness: Brightness.dark,
+      ),
+    );
+  }
 
   Future<void> _completeOnBoarding(BuildContext context) async {
     await Future.delayed(const Duration(milliseconds: 300));
@@ -51,7 +66,9 @@ class OnboardingScreen extends StatelessWidget {
               height: size.height * 0.35,
               margin: EdgeInsets.all(14),
               decoration: BoxDecoration(
-                color: theme.scaffoldBackgroundColor,
+                color: theme.brightness == Brightness.dark 
+                    ? const Color(0xFF343541) 
+                    : theme.scaffoldBackgroundColor,
                 borderRadius: BorderRadius.circular(40),
                 /* boxShadow: [
                   BoxShadow(
