@@ -1,9 +1,10 @@
 import '../data_sources/remote/profile_api_service.dart';
 import '../models/profile/personal_details.dart';
 import '../models/profile/medical_profile.dart';
+import 'dart:io';
 
 /// Profile repository - Business logic for profile operations
-/// 
+///
 /// Coordinates:
 /// - Profile API service (remote data)
 /// - Local caching for offline access
@@ -11,16 +12,15 @@ import '../models/profile/medical_profile.dart';
 class ProfileRepository {
   final ProfileApiService _profileApiService;
 
-  ProfileRepository({
-    required ProfileApiService profileApiService,
-  }) : _profileApiService = profileApiService;
+  ProfileRepository({required ProfileApiService profileApiService})
+    : _profileApiService = profileApiService;
 
   // ══════════════════════════════════════════════════════════════════════════
   // PERSONAL DETAILS
   // ══════════════════════════════════════════════════════════════════════════
 
   /// Save personal details
-  /// 
+  ///
   /// [personalDetails] - Personal information to save
   Future<void> savePersonalDetails(PersonalDetails personalDetails) async {
     try {
@@ -37,7 +37,7 @@ class ProfileRepository {
   }
 
   /// Get personal details
-  /// 
+  ///
   /// Returns user's personal information
   Future<PersonalDetails> getPersonalDetails() async {
     try {
@@ -57,7 +57,7 @@ class ProfileRepository {
   }
 
   /// Update specific personal detail field
-  /// 
+  ///
   /// This is a convenience method to update a single field
   /// without fetching and re-saving the entire profile
   Future<void> updatePersonalDetailField({
@@ -97,8 +97,20 @@ class ProfileRepository {
   // MEDICAL PROFILE
   // ══════════════════════════════════════════════════════════════════════════
 
+  /// Get medical profile
+  ///
+  /// Returns user's medical history
+  Future<MedicalProfile> getMedicalProfile() async {
+    try {
+      final profile = await _profileApiService.getMedicalProfile();
+      return profile;
+    } catch (e) {
+      throw Exception('Failed to get medical profile: $e');
+    }
+  }
+
   /// Save medical profile
-  /// 
+  ///
   /// [medicalProfile] - Medical history to save
   Future<void> saveMedicalProfile(MedicalProfile medicalProfile) async {
     try {
@@ -115,7 +127,7 @@ class ProfileRepository {
   }
 
   /// Update medical profile field
-  /// 
+  ///
   /// Convenience method to update specific medical profile fields
   Future<void> updateMedicalProfileField({
     List<String>? allergies,
@@ -150,11 +162,49 @@ class ProfileRepository {
   }
 
   // ══════════════════════════════════════════════════════════════════════════
+  // PROFILE PHOTO OPERATIONS
+  // ══════════════════════════════════════════════════════════════════════════
+
+  /// Upload profile photo
+  ///
+  /// [imageFile] - Image file to upload
+  /// [onProgress] - Optional callback for upload progress (0.0 to 1.0)
+  ///
+  /// Returns the URL of the uploaded photo
+  Future<String> uploadProfilePhoto(
+    File imageFile, {
+    Function(double)? onProgress,
+  }) async {
+    try {
+      // Upload the photo
+      final photoUrl = await _profileApiService.uploadProfilePhoto(
+        imageFile,
+        onProgress: onProgress,
+      );
+
+      return photoUrl;
+    } catch (e) {
+      throw Exception('Failed to upload profile photo: $e');
+    }
+  }
+
+  /// Delete profile photo
+  ///
+  /// Removes the user's profile photo
+  Future<void> deleteProfilePhoto() async {
+    try {
+      await _profileApiService.deleteProfilePhoto();
+    } catch (e) {
+      throw Exception('Failed to delete profile photo: $e');
+    }
+  }
+
+  // ══════════════════════════════════════════════════════════════════════════
   // COMBINED OPERATIONS
   // ══════════════════════════════════════════════════════════════════════════
 
   /// Save complete profile (personal + medical)
-  /// 
+  ///
   /// [personalDetails] - Personal information
   /// [medicalProfile] - Medical history
   Future<void> saveCompleteProfile({
@@ -188,11 +238,13 @@ class ProfileRepository {
       throw Exception('Invalid age: must be between 0 and 150');
     }
 
-    if (details.height != null && (details.height! < 0 || details.height! > 300)) {
+    if (details.height != null &&
+        (details.height! < 0 || details.height! > 300)) {
       throw Exception('Invalid height: must be between 0 and 300 cm');
     }
 
-    if (details.weight != null && (details.weight! < 0 || details.weight! > 500)) {
+    if (details.weight != null &&
+        (details.weight! < 0 || details.weight! > 500)) {
       throw Exception('Invalid weight: must be between 0 and 500 kg');
     }
 
@@ -211,14 +263,14 @@ class ProfileRepository {
   // ══════════════════════════════════════════════════════════════════════════
 
   /// Check if profile is complete
-  /// 
+  ///
   /// Returns true if both personal and medical profiles have essential data
   Future<bool> isProfileComplete() async {
     try {
       final personalDetails = await getPersonalDetails();
 
       // Check if essential fields are filled
-      final hasEssentialPersonalInfo = 
+      final hasEssentialPersonalInfo =
           personalDetails.fullName != null &&
           personalDetails.age != null &&
           personalDetails.gender != null;
@@ -230,7 +282,7 @@ class ProfileRepository {
   }
 
   /// Get profile completion percentage
-  /// 
+  ///
   /// Returns a percentage (0-100) of how complete the profile is
   Future<int> getProfileCompletionPercentage() async {
     try {

@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'dart:io';
 import 'api_client.dart';
 import '../../models/profile/personal_details.dart';
 import '../../models/profile/medical_profile.dart';
@@ -31,10 +32,7 @@ class ProfileApiService {
         data['medical_profile'] = medicalProfile.toJson();
       }
 
-      await _apiClient.post(
-        ApiConstants.saveProfile,
-        data: data,
-      );
+      await _apiClient.post(ApiConstants.saveProfile, data: data);
     } on DioException catch (e) {
       throw _handleError(e);
     }
@@ -46,9 +44,7 @@ class ProfileApiService {
     try {
       await _apiClient.post(
         ApiConstants.saveProfile,
-        data: {
-          'personal_details': personalDetails.toJson(),
-        },
+        data: {'personal_details': personalDetails.toJson()},
       );
     } on DioException catch (e) {
       throw _handleError(e);
@@ -61,9 +57,7 @@ class ProfileApiService {
     try {
       await _apiClient.post(
         ApiConstants.saveProfile,
-        data: {
-          'medical_profile': medicalProfile.toJson(),
-        },
+        data: {'medical_profile': medicalProfile.toJson()},
       );
     } on DioException catch (e) {
       throw _handleError(e);
@@ -81,7 +75,7 @@ class ProfileApiService {
       final response = await _apiClient.get(ApiConstants.getProfile);
 
       final data = response.data as Map<String, dynamic>;
-      
+
       // Backend returns personal_details directly
       if (data.isEmpty) {
         // Return empty profile if no data
@@ -89,6 +83,83 @@ class ProfileApiService {
       }
 
       return PersonalDetails.fromJson(data);
+    } on DioException catch (e) {
+      throw _handleError(e);
+    }
+  }
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // PROFILE PHOTO OPERATIONS
+  // ══════════════════════════════════════════════════════════════════════════
+
+  /// Upload profile photo
+  /// POST /user/profile/photo
+  ///
+  /// [imageFile] - Image file to upload
+  /// [onProgress] - Callback for upload progress (0.0 to 1.0)
+  ///
+  /// Returns the URL of the uploaded photo
+  Future<String> uploadProfilePhoto(
+    File imageFile, {
+    Function(double)? onProgress,
+  }) async {
+    try {
+      String fileName = imageFile.path.split('/').last;
+
+      FormData formData = FormData.fromMap({
+        'file': await MultipartFile.fromFile(
+          imageFile.path,
+          filename: fileName,
+        ),
+      });
+
+      final response = await _apiClient.post(
+        ApiConstants.uploadProfilePhoto,
+        data: formData,
+        onSendProgress:
+            onProgress != null
+                ? (sent, total) {
+                  if (total > 0) {
+                    onProgress(sent / total);
+                  }
+                }
+                : null,
+      );
+
+      final data = response.data as Map<String, dynamic>;
+      return data['profile_photo_url'] as String;
+    } on DioException catch (e) {
+      throw _handleError(e);
+    }
+  }
+
+  /// Delete profile photo
+  /// DELETE /user/profile/photo
+  Future<void> deleteProfilePhoto() async {
+    try {
+      await _apiClient.delete(ApiConstants.deleteProfilePhoto);
+    } on DioException catch (e) {
+      throw _handleError(e);
+    }
+  }
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // GET MEDICAL PROFILE
+  // ══════════════════════════════════════════════════════════════════════════
+
+  /// Get medical profile
+  /// GET /user/medical-profile
+  Future<MedicalProfile> getMedicalProfile() async {
+    try {
+      final response = await _apiClient.get(ApiConstants.getMedicalProfile);
+
+      final data = response.data as Map<String, dynamic>;
+
+      if (data.isEmpty) {
+        return MedicalProfile();
+      }
+
+      return MedicalProfile.fromJson(data);
     } on DioException catch (e) {
       throw _handleError(e);
     }

@@ -31,10 +31,12 @@ class _SignInScreenState extends State<SignInScreen> {
   //sign in with email
   Future<void> _signInWithEmail() async {
     if (!_formKey.currentState!.validate()) return;
+    if (!mounted) return;
 
     setState(() => _isLoading = true);
 
     try {
+      // Get provider reference before any async operations
       final authProvider = context.read<AuthProvider>();
 
       await authProvider.signIn(
@@ -44,22 +46,26 @@ class _SignInScreenState extends State<SignInScreen> {
 
       if (!mounted) return;
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Welcome back!'),
-          backgroundColor: Colors.green,
-        ),
-      );
+      // Reset loading state before navigation
+      setState(() => _isLoading = false);
 
-      Navigator.pushReplacementNamed(context, AppRoutes.chat);
+      // Navigate immediately without SnackBar to avoid animation conflicts
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          Navigator.pushReplacementNamed(context, AppRoutes.chat);
+        }
+      });
     } catch (e) {
       if (!mounted) return;
 
       // Show error message
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.toString()), backgroundColor: const Color.fromARGB(255, 249, 79, 67)),
+        SnackBar(
+          content: Text(e.toString()),
+          backgroundColor: const Color.fromARGB(255, 249, 79, 67),
+        ),
       );
-    } finally {
+
       if (mounted) {
         setState(() => _isLoading = false);
       }
@@ -68,28 +74,35 @@ class _SignInScreenState extends State<SignInScreen> {
 
   //sign in with google
   Future<void> _signInWithGoogle() async {
+    if (!mounted) return;
+
+    setState(() => _isLoading = true);
+
     try {
+      // Get provider reference before any async operations
       final authProvider = context.read<AuthProvider>();
 
       final user = await authProvider.signInWithGoogle();
 
       if (user == null) {
         // User cancelled Google Sign-In
+        if (mounted) {
+          setState(() => _isLoading = false);
+        }
         return;
       }
 
       if (!mounted) return;
 
-      // Show success message
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Signed in with Google!'),
-          backgroundColor: Colors.green,
-        ),
-      );
+      // Reset loading state before navigation
+      setState(() => _isLoading = false);
 
-      // Navigate to home
-      Navigator.pushReplacementNamed(context, AppRoutes.chat);
+      // Navigate immediately without SnackBar to avoid animation conflicts
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          Navigator.pushReplacementNamed(context, AppRoutes.chat);
+        }
+      });
     } catch (e) {
       if (!mounted) return;
 
@@ -100,10 +113,14 @@ class _SignInScreenState extends State<SignInScreen> {
           backgroundColor: Colors.red,
         ),
       );
+
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
   }
 
-   @override
+  @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     SystemChrome.setSystemUIOverlayStyle(
@@ -135,7 +152,7 @@ class _SignInScreenState extends State<SignInScreen> {
               alignment: Alignment.topCenter,
             ),
           ),
-      
+
           Align(
             alignment: Alignment.bottomCenter,
             child: Container(
@@ -148,9 +165,10 @@ class _SignInScreenState extends State<SignInScreen> {
                   margin: const EdgeInsets.fromLTRB(10, 10, 10, 20),
                   padding: const EdgeInsets.fromLTRB(20, 25, 20, 25),
                   decoration: BoxDecoration(
-                    color: theme.brightness == Brightness.dark 
-                        ? const Color(0xFF343541) 
-                        : theme.scaffoldBackgroundColor,
+                    color:
+                        theme.brightness == Brightness.dark
+                            ? const Color(0xFF343541)
+                            : theme.scaffoldBackgroundColor,
                     borderRadius: BorderRadius.circular(40),
                     boxShadow: [
                       BoxShadow(
@@ -177,9 +195,9 @@ class _SignInScreenState extends State<SignInScreen> {
                                     : theme.primaryColor,
                           ),
                         ),
-      
+
                         const SizedBox(height: 20),
-      
+
                         CustomTextField(
                           controller: _emailController,
                           label: 'Email',
@@ -196,9 +214,9 @@ class _SignInScreenState extends State<SignInScreen> {
                             return null;
                           },
                         ),
-      
+
                         const SizedBox(height: 18),
-      
+
                         PasswordField(
                           controller: _passwordController,
                           label: 'Password',
@@ -213,9 +231,8 @@ class _SignInScreenState extends State<SignInScreen> {
                             return null;
                           },
                         ),
-      
+
                         //const SizedBox(height: 2),
-      
                         Align(
                           alignment: Alignment.centerRight,
                           child: TextButton(
@@ -225,22 +242,24 @@ class _SignInScreenState extends State<SignInScreen> {
                                 AppRoutes.forgotPassword,
                               );
                             },
-                            child: Text('Forgot Password?',
-                            style: TextStyle(
-                              color: theme.primaryColor,
-                              fontSize: 13,
-                              fontWeight: FontWeight.w400
-                            ),),
+                            child: Text(
+                              'Forgot Password?',
+                              style: TextStyle(
+                                color: theme.primaryColor,
+                                fontSize: 13,
+                                fontWeight: FontWeight.w400,
+                              ),
+                            ),
                           ),
                         ),
-      
+
                         const SizedBox(height: 10),
-      
+
                         Consumer<AuthProvider>(
                           builder: (context, authProvider, child) {
                             final isLoading =
                                 authProvider.isLoading || _isLoading;
-      
+
                             return isLoading
                                 ? const LoadingIndicator()
                                 : PrimaryButton(
@@ -250,7 +269,7 @@ class _SignInScreenState extends State<SignInScreen> {
                                 );
                           },
                         ),
-      
+
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
@@ -280,14 +299,14 @@ class _SignInScreenState extends State<SignInScreen> {
                             ),
                           ],
                         ),
-      
+
                         const Text(
                           "or",
                           style: TextStyle(fontWeight: FontWeight.bold),
                         ),
-      
+
                         const SizedBox(height: 10),
-      
+
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [

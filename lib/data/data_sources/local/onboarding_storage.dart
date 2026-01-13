@@ -1,3 +1,4 @@
+import 'dart:developer' show log;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/constants/storage_keys.dart';
 
@@ -18,7 +19,11 @@ class OnboardingStorage {
   /// 
   /// Returns true if user has completed onboarding
   Future<bool> isOnboardingComplete() async {
-    return _prefs.getBool(StorageKeys.onboardingComplete) ?? false;
+    // Reload to get fresh data after hot restart
+    await _prefs.reload();
+    final isComplete = _prefs.getBool(StorageKeys.onboardingComplete) ?? false;
+    log('📋 Onboarding complete check: $isComplete');
+    return isComplete;
   }
 
   /// Mark onboarding as complete

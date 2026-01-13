@@ -3,9 +3,10 @@ import 'dart:developer' show log;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:medibot/data/data_sources/local/onboarding_storage.dart';
 import 'package:medibot/presentation/navigation/auth_router.dart';
 import 'package:medibot/presentation/screens/onboarding/widgets/slider_action_button.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:provider/provider.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -29,8 +30,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   Future<void> _completeOnBoarding(BuildContext context) async {
     await Future.delayed(const Duration(milliseconds: 300));
 
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('seenOnboarding', true);
+    // Use OnboardingStorage to properly save the completion flag
+    final onboardingStorage = context.read<OnboardingStorage>();
+    await onboardingStorage.setOnboardingComplete();
+    log('✅ Onboarding marked as complete');
 
     if (context.mounted) {
       log('Sign up screen ...');

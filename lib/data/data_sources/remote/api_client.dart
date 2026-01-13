@@ -3,6 +3,7 @@ import 'dart:developer' show log;
 import 'package:dio/dio.dart';
 import '../local/secure_storage_service.dart';
 import '../../../core/constants/api_constants.dart';
+import '../../../core/constants/storage_keys.dart';
 
 /// Dio API client with automatic token attachment and error handling
 ///
@@ -87,22 +88,59 @@ class ApiClient {
           );
           log('   Message: ${error.message}');
 
+          // Skip 401 handling for the refresh token endpoint itself
+          // to avoid infinite loops
+          final isRefreshRequest = error.requestOptions.path == ApiConstants.refreshToken;
+
           // Handle 401 Unauthorized (token expired or invalid)
-          if (error.response?.statusCode == 401) {
-            log('🔄 Token expired or invalid - clearing local data');
+          if (error.response?.statusCode == 401 && !isRefreshRequest) {
+            log('🔄 Token expired - attempting to refresh');
 
-            // Clear all local authentication data
-            await _storage.clearAll();
+            // Try to refresh the token
+            final refreshed = await tryRefreshToken();
+            
+            if (refreshed) {
+              log('✅ Token refreshed successfully - retrying request');
+              
+              // Retry the original request with new token
+              try {
+                final newToken = await _storage.getIdToken();
+                final opts = Options(
+                  method: error.requestOptions.method,
+                  headers: {
+                    ...error.requestOptions.headers,
+                    'Authorization': '${ApiConstants.bearerPrefix} $newToken',
+                  },
+                );
+                
+                final response = await _dio.request(
+                  error.requestOptions.path,
+                  data: error.requestOptions.data,
+                  queryParameters: error.requestOptions.queryParameters,
+                  options: opts,
+                );
+                
+                return handler.resolve(response);
+              } catch (retryError) {
+                log('❌ Retry failed after token refresh');
+                return handler.reject(error);
+              }
+            } else {
+              log('❌ Token refresh failed - clearing local data');
+              
+              // Clear all local authentication data only if refresh fails
+              await _storage.clearAll();
 
-            // Return custom error message
-            return handler.reject(
-              DioException(
-                requestOptions: error.requestOptions,
-                error: 'Session expired. Please login again.',
-                type: DioExceptionType.badResponse,
-                response: error.response,
-              ),
-            );
+              // Return custom error message
+              return handler.reject(
+                DioException(
+                  requestOptions: error.requestOptions,
+                  error: 'Session expired. Please login again.',
+                  type: DioExceptionType.badResponse,
+                  response: error.response,
+                ),
+              );
+            }
           }
 
           // Pass error to next handler
@@ -110,6 +148,60 @@ class ApiClient {
         },
       ),
     );
+  }
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // TOKEN REFRESH
+  // ══════════════════════════════════════════════════════════════════════════
+
+  /// Try to refresh the access token using the refresh token
+  /// 
+  /// This method is public so it can be called during app startup
+  /// to proactively refresh expired tokens.
+  /// 
+  /// Returns true if refresh was successful, false otherwise.
+  Future<bool> tryRefreshToken() async {
+    try {
+      final refreshToken = await _storage.getRefreshToken();
+      
+      if (refreshToken == null || refreshToken.isEmpty) {
+        log('❌ No refresh token available');
+        return false;
+      }
+
+      // Call the refresh token endpoint
+      final response = await _dio.post(
+        ApiConstants.refreshToken,
+        data: {'refresh_token': refreshToken},
+        options: Options(
+          headers: {
+            'Content-Type': ApiConstants.contentTypeJson,
+          },
+        ),
+      );
+
+      if (response.statusCode == 200 && response.data != null) {
+        final newIdToken = response.data['idToken'] as String?;
+        final newRefreshToken = response.data['refreshToken'] as String?;
+
+        if (newIdToken != null) {
+          // Update the stored tokens
+          await _storage.updateIdToken(newIdToken);
+          
+          if (newRefreshToken != null) {
+            // Some refresh endpoints return a new refresh token too
+            await _storage.write(StorageKeys.refreshToken, newRefreshToken);
+          }
+          
+          return true;
+        }
+      }
+      
+      return false;
+    } catch (e) {
+      log('❌ Token refresh error: $e');
+      return false;
+    }
   }
 
   // ══════════════════════════════════════════════════════════════════════════
@@ -140,8 +232,20 @@ class ApiClient {
   /// ```dart
   /// final response = await apiClient.post('/login', data: {'email': 'test@example.com'});
   /// ```
-  Future<Response> post(String path, {dynamic data, Options? options}) async {
-    return await _dio.post(path, data: data, options: options);
+  Future<Response> post(
+    String path, {
+    dynamic data,
+    Options? options,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
+  }) async {
+    return await _dio.post(
+      path,
+      data: data,
+      options: options,
+      onSendProgress: onSendProgress,
+      onReceiveProgress: onReceiveProgress,
+    );
   }
 
   /// PUT request

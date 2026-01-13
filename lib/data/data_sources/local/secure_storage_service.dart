@@ -1,3 +1,4 @@
+import 'dart:developer' show log;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../../../core/constants/storage_keys.dart';
 
@@ -5,7 +6,7 @@ import '../../../core/constants/storage_keys.dart';
 /// 
 /// Uses flutter_secure_storage which provides encrypted storage:
 /// - iOS: Keychain
-/// - Android: EncryptedSharedPreferences
+/// - Android: EncryptedSharedPreferences (with resetOnError for resilience)
 /// 
 /// Use this for:
 /// - Authentication tokens
@@ -13,9 +14,12 @@ import '../../../core/constants/storage_keys.dart';
 /// - Any sensitive user data
 class SecureStorageService {
   // Create secure storage instance with options
+  // resetOnError: true - If there's a decryption error (e.g., after app reinstall),
+  // the storage will be cleared rather than throwing an error
   final FlutterSecureStorage _storage = const FlutterSecureStorage(
     aOptions: AndroidOptions(
       encryptedSharedPreferences: true,
+      resetOnError: true,
     ),
     iOptions: IOSOptions(
       accessibility: KeychainAccessibility.first_unlock,
@@ -40,13 +44,29 @@ class SecureStorageService {
   }
 
   /// Get ID token (Firebase JWT)
+  /// 
+  /// Returns null if token doesn't exist or if there's an error reading storage
   Future<String?> getIdToken() async {
-    return await _storage.read(key: StorageKeys.idToken);
+    try {
+      return await _storage.read(key: StorageKeys.idToken);
+    } catch (e) {
+      log('❌ Error reading ID token from secure storage: $e');
+      // On some Android devices, encrypted storage can become corrupted
+      // In that case, we return null and the user will need to re-login
+      return null;
+    }
   }
 
   /// Get refresh token
+  /// 
+  /// Returns null if token doesn't exist or if there's an error reading storage
   Future<String?> getRefreshToken() async {
-    return await _storage.read(key: StorageKeys.refreshToken);
+    try {
+      return await _storage.read(key: StorageKeys.refreshToken);
+    } catch (e) {
+      log('❌ Error reading refresh token from secure storage: $e');
+      return null;
+    }
   }
 
   /// Get user UID
@@ -133,6 +153,9 @@ class SecureStorageService {
 
   /// Clear all authentication data (logout)
   Future<void> clearAll() async {
+    log('🗑️ CLEARING ALL SECURE STORAGE DATA');
+    // Print stack trace to help identify what's calling this
+    log(StackTrace.current.toString().split('\n').take(10).join('\n'));
     await _storage.deleteAll();
   }
 
@@ -158,9 +181,18 @@ class SecureStorageService {
   // ══════════════════════════════════════════════════════════════════════════
 
   /// Check if user has valid token (is logged in)
+  /// 
+  /// Returns true if a non-empty ID token exists in secure storage
   Future<bool> hasToken() async {
-    final token = await getIdToken();
-    return token != null && token.isNotEmpty;
+    try {
+      final token = await getIdToken();
+      final hasValidToken = token != null && token.isNotEmpty;
+      log('🔑 Token check: ${hasValidToken ? "Token exists" : "No token found"}');
+      return hasValidToken;
+    } catch (e) {
+      log('❌ Error checking token: $e');
+      return false;
+    }
   }
 
   /// Get all stored keys

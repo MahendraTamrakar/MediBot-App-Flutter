@@ -2,11 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:medibot/data/data_sources/remote/chat_api_service.dart';
+import 'package:medibot/data/data_sources/remote/profile_api_service.dart';
 import 'package:medibot/data/repositories/chat_repository.dart';
+import 'package:medibot/data/repositories/profile_repository.dart';
 import 'package:medibot/presentation/navigation/auth_router.dart';
 import 'package:medibot/presentation/navigation/navigation_service.dart';
 import 'package:medibot/presentation/providers/auth/auth_provider.dart';
 import 'package:medibot/presentation/providers/chat/chat_provider.dart';
+import 'package:medibot/presentation/providers/profile/profile_provider.dart';
 import 'package:medibot/presentation/theme/dark_theme.dart';
 import 'package:medibot/presentation/theme/light_theme.dart';
 import 'package:provider/provider.dart';
@@ -29,7 +32,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await dotenv.load(fileName: ".env");
-  
+
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
@@ -49,7 +52,7 @@ void main() async {
   final sharedPreferences = await SharedPreferences.getInstance();
   final onboardingStorage = OnboardingStorage(sharedPreferences);
   final connectivityService = ConnectivityService();
-  
+
   final apiClient = ApiClient(
     baseUrl: dotenv.env['BACKEND_URL'] ?? 'https://your-backend-url.com',
     storage: secureStorage,
@@ -57,22 +60,27 @@ void main() async {
 
   final authApiService = AuthApiService(apiClient);
   final chatApiService = ChatApiService(apiClient);
+  final profileApiService = ProfileApiService(apiClient);
   final googleSignInService = GoogleSignInService();
 
   final authRepository = AuthRepository(
     apiService: authApiService,
     storage: secureStorage,
     googleSignIn: googleSignInService,
+    apiClient: apiClient,
   );
 
-  final chatRepository = ChatRepository(
-    chatApiService: chatApiService,
+  final chatRepository = ChatRepository(chatApiService: chatApiService);
+
+  final profileRepository = ProfileRepository(
+    profileApiService: profileApiService,
   );
 
   runApp(
     MyApp(
       authRepository: authRepository,
       chatRepository: chatRepository,
+      profileRepository: profileRepository,
       secureStorage: secureStorage,
       connectivityService: connectivityService,
       onboardingStorage: onboardingStorage,
@@ -80,9 +88,10 @@ void main() async {
   );
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   final AuthRepository authRepository;
   final ChatRepository chatRepository;
+  final ProfileRepository profileRepository;
   final SecureStorageService secureStorage;
   final ConnectivityService connectivityService;
   final OnboardingStorage onboardingStorage;
@@ -91,25 +100,61 @@ class MyApp extends StatelessWidget {
     super.key,
     required this.authRepository,
     required this.chatRepository,
+    required this.profileRepository,
     required this.secureStorage,
     required this.connectivityService,
     required this.onboardingStorage,
   });
 
   @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
+  Brightness? _previousBrightness;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangePlatformBrightness() {
+    final newBrightness = WidgetsBinding.instance.platformDispatcher.platformBrightness;
+    if (_previousBrightness != null && _previousBrightness != newBrightness) {
+      // Close any open popups/dialogs when theme changes
+      final navigator = NavigationService.navigatorKey.currentState;
+      if (navigator != null && navigator.canPop()) {
+        navigator.pop();
+      }
+    }
+    _previousBrightness = newBrightness;
+    super.didChangePlatformBrightness();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(
-          create: (_) => AuthProvider(authRepository: authRepository),
+          create: (_) => AuthProvider(authRepository: widget.authRepository),
         ),
+        ChangeNotifierProvider(create: (_) => ChatProvider(widget.chatRepository)),
         ChangeNotifierProvider(
-          create: (_) => ChatProvider(chatRepository),
+          create: (_) => ProfileProvider(widget.profileRepository),
         ),
-        Provider<ConnectivityService>.value(value: connectivityService),
-        Provider<OnboardingStorage>.value(value: onboardingStorage),
-        Provider<AuthRepository>.value(value: authRepository),
-        Provider<ChatRepository>.value(value: chatRepository),
+        Provider<ConnectivityService>.value(value: widget.connectivityService),
+        Provider<OnboardingStorage>.value(value: widget.onboardingStorage),
+        Provider<AuthRepository>.value(value: widget.authRepository),
+        Provider<ChatRepository>.value(value: widget.chatRepository),
+        Provider<ProfileRepository>.value(value: widget.profileRepository),
       ],
       child: MaterialApp(
         title: 'MediBot',
@@ -120,12 +165,6 @@ class MyApp extends StatelessWidget {
         navigatorKey: NavigationService.navigatorKey,
         onGenerateRoute: AppRouter.generateRoute,
         home: const InitialScreen(),
-        builder: (context, child) {
-          return MediaQuery(
-            data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
-            child: child ?? const SizedBox.shrink(),
-          );
-        },
       ),
     );
   }
@@ -173,8 +212,6 @@ class _InitialScreenState extends State<InitialScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      body: SizedBox.shrink(),
-    );
+    return const Scaffold(body: SizedBox.shrink());
   }
 }

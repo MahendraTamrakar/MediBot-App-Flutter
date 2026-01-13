@@ -319,7 +319,7 @@ class _ChatInputBarState extends State<ChatInputBar>
                   Container(
                     height: 36,
                     width: 36,
-                    margin: const EdgeInsets.only(right: 14),
+                    margin: const EdgeInsets.only(right: 10),
                     decoration: BoxDecoration(
                       color: widget.isStreaming 
                           ? Colors.red 

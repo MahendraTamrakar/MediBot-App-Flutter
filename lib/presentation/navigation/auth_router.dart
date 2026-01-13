@@ -8,6 +8,8 @@ import 'package:medibot/presentation/screens/auth/sign_up/sign_up_screen.dart';
 import 'package:medibot/presentation/screens/main/chat/chat_screen.dart';
 import 'package:medibot/presentation/screens/main/drawer/widgets/drawer_animation.dart';
 import 'package:medibot/presentation/screens/onboarding/onboarding_screen.dart';
+import 'package:medibot/presentation/screens/settings/edit_profile_screen.dart';
+import 'package:medibot/presentation/screens/settings/setting_screen.dart';
 
 /// App Router - Centralized route management
 ///
@@ -65,17 +67,32 @@ class AppRouter {
           settings: settings,
         );
 
-       //main app routes
-      
+      //main app routes
+
       case AppRoutes.chat:
         return MaterialPageRoute(
-          builder: (_) => AuthGuard(
-            child: AnimatedDrawerScaffold(
-              builder: (context, toggle) => ChatScreen(onMenuPressed: toggle),
-            ),
-          ),
+          builder:
+              (_) => AuthGuard(
+                child: AnimatedDrawerScaffold(
+                  builder:
+                      (context, toggle) => ChatScreen(onMenuPressed: toggle),
+                ),
+              ),
           settings: settings,
         );
+
+      case AppRoutes.settings:
+        return MaterialPageRoute(
+          builder: (_) => const AuthGuard(child: SettingsScreen()),
+          settings: settings,
+        );
+
+      case AppRoutes.editProfile:
+        return MaterialPageRoute(
+          builder: (_) => const AuthGuard(child: EditProfileScreen()),
+          settings: settings,
+        );
+
       /*
       case AppRoutes.chat:
         // Get session ID from arguments (optional)
@@ -105,11 +122,6 @@ class AppRouter {
           settings: settings,
         );
 
-      case AppRoutes.settings:
-        return MaterialPageRoute(
-          builder: (_) => const AuthGuard(child: SettingsScreen()),
-          settings: settings,
-        );
 
       case AppRoutes.reports:
         return MaterialPageRoute(
@@ -207,12 +219,7 @@ class AppRoutes {
 
   /// Check if route requires authentication
   static bool isProtectedRoute(String route) {
-    return ![
-      onboarding,
-      signIn,
-      signUp,
-      forgotPassword,
-    ].contains(route);
+    return ![onboarding, signIn, signUp, forgotPassword].contains(route);
   }
 
   /// Check if route is authentication route

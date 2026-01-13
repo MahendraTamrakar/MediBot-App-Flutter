@@ -37,6 +37,19 @@ class ChatProvider extends ChangeNotifier {
   String? get currentSessionId => _currentSessionId;
   bool get hasMessages => _messages.isNotEmpty;
 
+  /// Get current session title from chatSessions list
+  String? get currentSessionTitle {
+    if (_currentSessionId == null) return null;
+    try {
+      final session = _chatSessions.firstWhere(
+        (s) => s.sessionId == _currentSessionId,
+      );
+      return session.title;
+    } catch (e) {
+      return null;
+    }
+  }
+
   // ══════════════════════════════════════════════════════════════════════════
   // SEND MESSAGE (NON-STREAMING)
   // ══════════════════════════════════════════════════════════════════════════

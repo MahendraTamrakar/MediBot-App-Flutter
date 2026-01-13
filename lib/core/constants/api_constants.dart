@@ -26,6 +26,9 @@ class ApiConstants {
   /// Forgot password
   static const String forgotPassword = '/auth/forgot-password';
 
+  /// Refresh token
+  static const String refreshToken = '/auth/refresh-token';
+
   // ════════════════════════════════════════════════════════════════════════════
   // CHAT ENDPOINTS
   // ════════════════════════════════════════════════════════════════════════════
@@ -78,6 +81,15 @@ class ApiConstants {
 
   /// Get user profile
   static const String getProfile = '/user/profile';
+
+  /// Upload profile photo
+  static const String uploadProfilePhoto = '/user/profile/photo';
+
+  /// Delete profile photo
+  static const String deleteProfilePhoto = '/user/profile/photo';
+
+  /// Get medical profile
+  static const String getMedicalProfile = '/user/medical-profile';
 
   // ════════════════════════════════════════════════════════════════════════════
   // DOCTOR SUMMARY ENDPOINTS

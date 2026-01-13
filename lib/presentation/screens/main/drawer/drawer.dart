@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:medibot/presentation/navigation/auth_router.dart';
+import 'package:medibot/presentation/providers/auth/auth_provider.dart';
 import 'package:medibot/presentation/screens/main/drawer/widgets/chat_history_items.dart';
 import 'package:medibot/presentation/screens/main/drawer/widgets/chat_option_sheet.dart';
 import 'package:provider/provider.dart';
@@ -67,28 +69,33 @@ class _DrawerMenuState extends State<DrawerMenu> {
               'Rename Chat',
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                 fontSize: 24,
-                fontWeight: FontWeight.w600
-
+                fontWeight: FontWeight.w600,
               ),
             ),
             content: TextField(
               controller: controller,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                fontSize: 13,
-
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall?.copyWith(fontSize: 13),
               decoration: InputDecoration(
                 filled: true,
-                fillColor: Theme.of(context).brightness == Brightness.dark
-                  ? Colors.grey.shade700
-                  : Colors.grey.shade100,
+                fillColor:
+                    Theme.of(context).brightness == Brightness.dark
+                        ? Colors.grey.shade700
+                        : Colors.grey.shade100,
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
-                  borderSide: const BorderSide(color: Color.fromARGB(255, 96, 96, 96) , width: 1.0),
+                  borderSide: const BorderSide(
+                    color: Color.fromARGB(255, 96, 96, 96),
+                    width: 1.0,
+                  ),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
-                  borderSide: const BorderSide(color: Color.fromARGB(255, 96, 96, 96) , width: 1.0),
+                  borderSide: const BorderSide(
+                    color: Color.fromARGB(255, 96, 96, 96),
+                    width: 1.0,
+                  ),
                 ),
               ),
             ),
@@ -126,14 +133,14 @@ class _DrawerMenuState extends State<DrawerMenu> {
               'Delete Chat',
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                 fontSize: 24,
-                fontWeight: FontWeight.w600
+                fontWeight: FontWeight.w600,
               ),
             ),
             content: Text(
-              'Are you sure you want to delete "${session.title ?? 'this chat'}"?',
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                fontSize: 13,
-              ),
+              'Are you sure you want to delete this chat? This action cannot be undone.',
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall?.copyWith(fontSize: 13),
             ),
             actions: [
               TextButton(
@@ -190,26 +197,64 @@ class _DrawerMenuState extends State<DrawerMenu> {
           // Profile Header
           Row(
             children: [
-              CircleAvatar(radius: 22),
+
+              _buildUserAvatar(theme),
               SizedBox(width: 12),
-              Text(
-                "MediBot",
-                style: theme.textTheme.bodyLarge?.copyWith(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold
+              Consumer<AuthProvider>(
+                builder: (context, authProvider, child) {
+                  final user = authProvider.currentUser;
+                  String displayText = 'Guest';
+                  
+                  if (user != null) {
+                    if (user.firstName != null && user.firstName!.isNotEmpty) {
+                      displayText = user.firstName!;
+                    } else {
+                      displayText = user.email.split('@').first;
+                    }
+                  }
+                  
+                  return Text(
+                    displayText,
+                    style: theme.textTheme.bodyLarge?.copyWith(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  );
+                },
+              ),
+              const SizedBox(width: 90),
+              IconButton(
+                onPressed: () {
+                  Navigator.pushNamed(context, AppRoutes.settings);
+                },
+                icon: Icon(
+                  Icons.settings_rounded,
+                  color:
+                      theme.brightness == Brightness.dark
+                          ? Colors.white
+                          : theme.primaryColor,
                 ),
               ),
             ],
           ),
           const SizedBox(height: 10),
-          // Menu Items
-          _drawerItem(Icons.add_circle_outline_rounded, "New Chat", onTap: _onNewChat),
+
+          _drawerItem(
+            Icons.add_circle_outline_rounded,
+            "New Chat",
+            onTap: _onNewChat,
+          ),
           _drawerItem(Icons.file_upload_rounded, "Upload Medical Report"),
           _drawerItem(Icons.person_2_rounded, "Medical Profile"),
 
           const SizedBox(height: 2),
-          Divider(color: theme.brightness == Brightness.dark ? Colors.grey.shade800
-                  : Colors.grey.shade200, endIndent: 150),
+          Divider(
+            color:
+                theme.brightness == Brightness.dark
+                    ? Colors.grey.shade800
+                    : Colors.grey.shade200,
+            endIndent: 150,
+          ),
           const SizedBox(height: 8),
 
           Text(
@@ -224,6 +269,33 @@ class _DrawerMenuState extends State<DrawerMenu> {
           // History List
           Expanded(child: _buildChatHistoryList()),
         ],
+      ),
+    );
+  }
+
+  Widget _buildUserAvatar(ThemeData theme) {
+    final authProvider = context.watch<AuthProvider>();
+    final photoUrl = authProvider.currentUser?.photoUrl;
+
+    return Container(
+      width: 48,
+      height: 48,
+      decoration: BoxDecoration(
+        color: const Color.fromARGB(255, 163, 163, 163),
+        shape: BoxShape.circle,
+      ),
+      child: ClipOval(
+        child: photoUrl != null && photoUrl.isNotEmpty
+            ? Image.network(
+                photoUrl,
+                fit: BoxFit.cover,
+                errorBuilder: (_, __, ___) => const Icon(
+                  Icons.person,
+                  size: 18,
+                  color: Colors.white,
+                ),
+              )
+            : const Icon(Icons.person, size: 18, color: Colors.white),
       ),
     );
   }
@@ -267,7 +339,14 @@ class _DrawerMenuState extends State<DrawerMenu> {
 
     return ListTile(
       contentPadding: EdgeInsets.zero,
-      leading: Icon(icon, color: theme.brightness == Brightness.dark ? Colors.white54 : const Color.fromARGB(154, 81, 103, 227), size: 22),
+      leading: Icon(
+        icon,
+        color:
+            theme.brightness == Brightness.dark
+                ? Colors.white54
+                : const Color.fromARGB(154, 81, 103, 227),
+        size: 22,
+      ),
       title: Text(
         title,
         style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w500),

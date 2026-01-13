@@ -50,10 +50,11 @@ dependencies:
 
   # UI Enhancements
   shimmer: ^3.0.0            # Skeleton loaders
-  cached_network_image: ^3.3.0  # Image caching
+  cached_network_image: ^3.4.1  # Image caching
   flutter_slidable: ^3.0.1      # Swipe actions (for chat history)
   fluttertoast: ^8.2.4          # Toast messages
   animations: ^2.0.11        # Predefined animations
+  flutter_markdown: ^0.7.4+1    # Markdown rendering
   
   # Utilities
   intl: ^0.18.1              # Date formatting

@@ -8,6 +8,7 @@ class PersonalDetails {
   final String? bloodType;
   final String? phone;
   final String? address;
+  final String? profilePhotoUrl;
 
   PersonalDetails({
     this.fullName,
@@ -18,6 +19,7 @@ class PersonalDetails {
     this.bloodType,
     this.phone,
     this.address,
+    this.profilePhotoUrl,
   });
 
   /// Create from JSON
@@ -31,6 +33,7 @@ class PersonalDetails {
       bloodType: json['blood_type'] as String?,
       phone: json['phone'] as String?,
       address: json['address'] as String?,
+      profilePhotoUrl: json['profile_photo_url'] as String?,
     );
   }
 
@@ -45,6 +48,7 @@ class PersonalDetails {
       if (bloodType != null) 'blood_type': bloodType,
       if (phone != null) 'phone': phone,
       if (address != null) 'address': address,
+      if (profilePhotoUrl != null) 'profile_photo_url': profilePhotoUrl,
     };
   }
 
@@ -67,6 +71,7 @@ class PersonalDetails {
     String? bloodType,
     String? phone,
     String? address,
+    String? profilePhotoUrl,
   }) {
     return PersonalDetails(
       fullName: fullName ?? this.fullName,
@@ -77,6 +82,7 @@ class PersonalDetails {
       bloodType: bloodType ?? this.bloodType,
       phone: phone ?? this.phone,
       address: address ?? this.address,
+      profilePhotoUrl: profilePhotoUrl ?? this.profilePhotoUrl,
     );
   }
 }
