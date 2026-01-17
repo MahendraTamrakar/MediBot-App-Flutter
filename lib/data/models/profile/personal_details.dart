@@ -1,5 +1,6 @@
 /// Personal details model
 class PersonalDetails {
+  final String? email;  // Required by backend but optional in Flutter (will be fetched from auth)
   final String? fullName;
   final int? age;
   final String? gender;
@@ -11,6 +12,7 @@ class PersonalDetails {
   final String? profilePhotoUrl;
 
   PersonalDetails({
+    this.email,
     this.fullName,
     this.age,
     this.gender,
@@ -25,6 +27,7 @@ class PersonalDetails {
   /// Create from JSON
   factory PersonalDetails.fromJson(Map<String, dynamic> json) {
     return PersonalDetails(
+      email: json['email'] as String?,
       fullName: json['full_name'] as String?,
       age: json['age'] as int?,
       gender: json['gender'] as String?,
@@ -40,6 +43,7 @@ class PersonalDetails {
   /// Convert to JSON
   Map<String, dynamic> toJson() {
     return {
+      if (email != null) 'email': email,
       if (fullName != null) 'full_name': fullName,
       if (age != null) 'age': age,
       if (gender != null) 'gender': gender,
@@ -63,6 +67,7 @@ class PersonalDetails {
 
   /// Copy with modified fields
   PersonalDetails copyWith({
+    String? email,
     String? fullName,
     int? age,
     String? gender,
@@ -74,6 +79,7 @@ class PersonalDetails {
     String? profilePhotoUrl,
   }) {
     return PersonalDetails(
+      email: email ?? this.email,
       fullName: fullName ?? this.fullName,
       age: age ?? this.age,
       gender: gender ?? this.gender,

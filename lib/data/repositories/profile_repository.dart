@@ -1,6 +1,6 @@
 import '../data_sources/remote/profile_api_service.dart';
 import '../models/profile/personal_details.dart';
-import '../models/profile/medical_profile.dart';
+
 import 'dart:io';
 
 /// Profile repository - Business logic for profile operations
@@ -61,6 +61,7 @@ class ProfileRepository {
   /// This is a convenience method to update a single field
   /// without fetching and re-saving the entire profile
   Future<void> updatePersonalDetailField({
+    String? email,
     String? fullName,
     int? age,
     String? gender,
@@ -76,6 +77,7 @@ class ProfileRepository {
 
       // Create updated details
       final updatedDetails = currentDetails.copyWith(
+        email: email ?? currentDetails.email,
         fullName: fullName,
         age: age,
         gender: gender,
@@ -93,73 +95,7 @@ class ProfileRepository {
     }
   }
 
-  // ══════════════════════════════════════════════════════════════════════════
-  // MEDICAL PROFILE
-  // ══════════════════════════════════════════════════════════════════════════
-
-  /// Get medical profile
-  ///
-  /// Returns user's medical history
-  Future<MedicalProfile> getMedicalProfile() async {
-    try {
-      final profile = await _profileApiService.getMedicalProfile();
-      return profile;
-    } catch (e) {
-      throw Exception('Failed to get medical profile: $e');
-    }
-  }
-
-  /// Save medical profile
-  ///
-  /// [medicalProfile] - Medical history to save
-  Future<void> saveMedicalProfile(MedicalProfile medicalProfile) async {
-    try {
-      // Validate before saving
-      _validateMedicalProfile(medicalProfile);
-
-      await _profileApiService.saveMedicalProfile(medicalProfile);
-
-      // Optional: Cache locally
-      // await _cacheMedicalProfile(medicalProfile);
-    } catch (e) {
-      throw Exception('Failed to save medical profile: $e');
-    }
-  }
-
-  /// Update medical profile field
-  ///
-  /// Convenience method to update specific medical profile fields
-  Future<void> updateMedicalProfileField({
-    List<String>? allergies,
-    List<String>? chronicConditions,
-    List<String>? currentMedications,
-    List<String>? pastSurgeries,
-    String? familyHistory,
-    bool? isSmoker,
-    bool? drinksAlcohol,
-    String? exerciseFrequency,
-    String? dietType,
-  }) async {
-    try {
-      // For simplicity, create new profile with provided fields
-      // In production, you might want to fetch current profile first
-      final updatedProfile = MedicalProfile(
-        allergies: allergies,
-        chronicConditions: chronicConditions,
-        currentMedications: currentMedications,
-        pastSurgeries: pastSurgeries,
-        familyHistory: familyHistory,
-        isSmoker: isSmoker,
-        drinksAlcohol: drinksAlcohol,
-        exerciseFrequency: exerciseFrequency,
-        dietType: dietType,
-      );
-
-      await saveMedicalProfile(updatedProfile);
-    } catch (e) {
-      throw Exception('Failed to update medical profile: $e');
-    }
-  }
+ 
 
   // ══════════════════════════════════════════════════════════════════════════
   // PROFILE PHOTO OPERATIONS
@@ -199,39 +135,22 @@ class ProfileRepository {
     }
   }
 
-  // ══════════════════════════════════════════════════════════════════════════
-  // COMBINED OPERATIONS
-  // ══════════════════════════════════════════════════════════════════════════
-
-  /// Save complete profile (personal + medical)
-  ///
-  /// [personalDetails] - Personal information
-  /// [medicalProfile] - Medical history
+  
   Future<void> saveCompleteProfile({
     PersonalDetails? personalDetails,
-    MedicalProfile? medicalProfile,
   }) async {
     try {
       if (personalDetails != null) {
         _validatePersonalDetails(personalDetails);
       }
-
-      if (medicalProfile != null) {
-        _validateMedicalProfile(medicalProfile);
-      }
-
       await _profileApiService.saveProfile(
         personalDetails: personalDetails,
-        medicalProfile: medicalProfile,
       );
     } catch (e) {
       throw Exception('Failed to save complete profile: $e');
     }
   }
 
-  // ══════════════════════════════════════════════════════════════════════════
-  // VALIDATION
-  // ══════════════════════════════════════════════════════════════════════════
 
   void _validatePersonalDetails(PersonalDetails details) {
     if (details.age != null && (details.age! < 0 || details.age! > 150)) {
@@ -253,10 +172,7 @@ class ProfileRepository {
     }
   }
 
-  void _validateMedicalProfile(MedicalProfile profile) {
-    // Add any medical profile validation here
-    // For now, no specific validation needed
-  }
+
 
   // ══════════════════════════════════════════════════════════════════════════
   // HELPER METHODS

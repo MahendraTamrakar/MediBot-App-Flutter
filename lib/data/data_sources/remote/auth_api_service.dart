@@ -1,6 +1,7 @@
 import 'dart:developer' show log;
 
 import 'package:dio/dio.dart';
+import 'package:medibot/core/constants/api_constants.dart';
 import 'package:medibot/data/models/auth/signup_resquest.dart';
 import 'api_client.dart';
 import '../../models/auth/login_request.dart';
@@ -221,6 +222,27 @@ class AuthApiService {
       final response = await _apiClient.post(
         '/auth/token/refresh',
         data: {'refresh_token': refreshToken},
+      );
+
+      return response.data as Map<String, dynamic>;
+    } on DioException catch (e) {
+      throw _handleError(e);
+    }
+  }
+
+
+  // Add this method to your existing AuthApiService class:
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // DELETE ACCOUNT
+  // ══════════════════════════════════════════════════════════════════════════
+
+  /// Delete user account
+  /// DELETE /auth/delete-account
+  Future<Map<String, dynamic>> deleteAccount() async {
+    try {
+      final response = await _apiClient.delete(
+        ApiConstants.deleteAccount, // Add this constant: '/auth/delete-account'
       );
 
       return response.data as Map<String, dynamic>;

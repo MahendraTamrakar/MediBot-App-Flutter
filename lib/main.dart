@@ -10,6 +10,7 @@ import 'package:medibot/presentation/navigation/navigation_service.dart';
 import 'package:medibot/presentation/providers/auth/auth_provider.dart';
 import 'package:medibot/presentation/providers/chat/chat_provider.dart';
 import 'package:medibot/presentation/providers/profile/profile_provider.dart';
+import 'package:medibot/presentation/providers/theme/theme_provider.dart';
 import 'package:medibot/presentation/theme/dark_theme.dart';
 import 'package:medibot/presentation/theme/light_theme.dart';
 import 'package:provider/provider.dart';
@@ -127,7 +128,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
   @override
   void didChangePlatformBrightness() {
-    final newBrightness = WidgetsBinding.instance.platformDispatcher.platformBrightness;
+    final newBrightness =
+        WidgetsBinding.instance.platformDispatcher.platformBrightness;
     if (_previousBrightness != null && _previousBrightness != newBrightness) {
       // Close any open popups/dialogs when theme changes
       final navigator = NavigationService.navigatorKey.currentState;
@@ -143,10 +145,13 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
+        ChangeNotifierProvider(create: (_) => ThemeProvider()),
         ChangeNotifierProvider(
           create: (_) => AuthProvider(authRepository: widget.authRepository),
         ),
-        ChangeNotifierProvider(create: (_) => ChatProvider(widget.chatRepository)),
+        ChangeNotifierProvider(
+          create: (_) => ChatProvider(widget.chatRepository),
+        ),
         ChangeNotifierProvider(
           create: (_) => ProfileProvider(widget.profileRepository),
         ),
@@ -156,15 +161,19 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         Provider<ChatRepository>.value(value: widget.chatRepository),
         Provider<ProfileRepository>.value(value: widget.profileRepository),
       ],
-      child: MaterialApp(
-        title: 'MediBot',
-        debugShowCheckedModeBanner: false,
-        theme: getLightTheme(),
-        darkTheme: getDarkTheme(),
-        themeMode: ThemeMode.system,
-        navigatorKey: NavigationService.navigatorKey,
-        onGenerateRoute: AppRouter.generateRoute,
-        home: const InitialScreen(),
+      child: Consumer<ThemeProvider>(
+        builder: (context, themeProvider, _) {
+          return MaterialApp(
+            title: 'MediBot',
+            debugShowCheckedModeBanner: false,
+            theme: getLightTheme(),
+            darkTheme: getDarkTheme(),
+            themeMode: themeProvider.themeMode,
+            navigatorKey: NavigationService.navigatorKey,
+            onGenerateRoute: AppRouter.generateRoute,
+            home: const InitialScreen(),
+          );
+        },
       ),
     );
   }

@@ -88,12 +88,16 @@ class AuthRepository {
         uid: response.uid,
       );
       await _storage.saveEmail(email);
+      // Save display name as name before @
+      final displayName = email.split('@').first;
+      await _storage.saveDisplayName(displayName);
 
       // 3. Return user model
       return UserModel(
         uid: response.uid,
         email: email,
         emailVerified: response.emailVerified,
+        displayName: displayName,
       );
     } catch (e) {
       rethrow;
@@ -130,10 +134,15 @@ class AuthRepository {
         uid: response.uid,
       );
 
-      // Get email from Google user if available
+      // Get email and display name from Google user if available
       final googleUser = _googleSignIn.currentUser;
       if (googleUser != null) {
         await _storage.saveEmail(googleUser.email);
+        if (googleUser.displayName != null && googleUser.displayName!.isNotEmpty) {
+          await _storage.saveDisplayName(googleUser.displayName!);
+        } else {
+          await _storage.saveDisplayName(googleUser.email.split('@').first);
+        }
         if (googleUser.photoUrl != null) {
           await _storage.savePhotoUrl(googleUser.photoUrl!);
         }
@@ -144,7 +153,7 @@ class AuthRepository {
         uid: response.uid,
         email: googleUser?.email ?? '',
         emailVerified: response.emailVerified,
-        displayName: googleUser?.displayName,
+        displayName: googleUser?.displayName ?? (googleUser?.email.split('@').first ?? ''),
         photoUrl: googleUser?.photoUrl,
       );
     } catch (e) {
@@ -164,6 +173,20 @@ class AuthRepository {
       await _apiService.sendPasswordResetEmail(email);
     } catch (e) {
       rethrow;
+    }
+  }
+
+  Future<bool> deleteAccount() async {
+    try {
+      // Call API to delete account
+      await _apiService.deleteAccount();
+
+      // Clear all local data
+      await _storage.clearAll();
+
+      return true;
+    } catch (e) {
+      throw Exception('Failed to delete account: $e');
     }
   }
 
@@ -228,6 +251,7 @@ class AuthRepository {
   Future<UserModel?> getCurrentUser() async {
     final uid = await _storage.getUid();
     final email = await _storage.getEmail();
+    final displayName = await _storage.getDisplayName();
     final photoUrl = await _storage.getPhotoUrl();
 
     if (uid != null && email != null) {
@@ -235,6 +259,7 @@ class AuthRepository {
         uid: uid,
         email: email,
         emailVerified: true, // Assume verified if logged in
+        displayName: displayName,
         photoUrl: photoUrl,
       );
     }

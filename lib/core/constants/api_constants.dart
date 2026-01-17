@@ -2,6 +2,16 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 /// API Constants - All API-related configuration in one place
 class ApiConstants {
+    /// Resolves a relative or absolute image URL to a full URL using the backend base URL.
+    static String resolveImageUrl(String url) {
+      if (url.startsWith('http://') || url.startsWith('https://')) {
+        return url;
+      }
+      // Remove leading slash if present to avoid double slashes
+      final base = backendUrl.endsWith('/') ? backendUrl.substring(0, backendUrl.length - 1) : backendUrl;
+      final path = url.startsWith('/') ? url.substring(1) : url;
+      return '$base/$path';
+    }
   // Prevent instantiation
   ApiConstants._();
 

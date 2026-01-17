@@ -4,6 +4,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:medibot/core/constants/api_constants.dart';
 import 'package:medibot/presentation/providers/auth/auth_provider.dart';
 import 'package:medibot/presentation/providers/profile/profile_provider.dart';
 import 'package:medibot/presentation/screens/settings/widgets/profile_image_popUp_menu.dart';
@@ -239,7 +240,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     try {
       final profileProvider = context.read<ProfileProvider>();
 
+      final user = context.read<AuthProvider>().currentUser;
       await profileProvider.updatePersonalDetails(
+        email: user?.email,
         fullName: _nameController.text.isNotEmpty ? _nameController.text : null,
         age: _ageController.text.isNotEmpty ? int.tryParse(_ageController.text) : null,
         gender: _selectedGender,
@@ -324,13 +327,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             // Profile Image
             Builder(
               builder: (context) {
-                // Use the initial photo URL captured at init - this won't change
-                final photoUrl = _initialPhotoUrl;
-                
-                // Determine what to show
+                // Always use the latest photo URL from the provider
+                final photoUrl = context.watch<ProfileProvider>().profilePhotoUrl;
+
                 Widget imageWidget;
                 if (_selectedImageFile != null) {
-                  // Show locally selected image while uploading
                   imageWidget = Image.file(
                     _selectedImageFile!,
                     fit: BoxFit.cover,
@@ -339,8 +340,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   );
                 } else if (photoUrl != null && photoUrl.isNotEmpty) {
                   // Show network image
+                  final resolvedUrl = ApiConstants.resolveImageUrl(photoUrl);
+                  // ignore: avoid_print
+                  print('[EditProfileScreen] Resolved photoUrl: $resolvedUrl');
                   imageWidget = CachedNetworkImage(
-                    imageUrl: photoUrl,
+                    imageUrl: resolvedUrl,
                     fit: BoxFit.cover,
                     width: 100,
                     height: 100,

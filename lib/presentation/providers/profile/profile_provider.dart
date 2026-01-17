@@ -3,7 +3,6 @@ import 'dart:developer' show log;
 import 'dart:io';
 import '../../../data/repositories/profile_repository.dart';
 import '../../../data/models/profile/personal_details.dart';
-import '../../../data/models/profile/medical_profile.dart';
 
 /// Profile Provider - Manages user profile state
 ///
@@ -17,7 +16,6 @@ class ProfileProvider extends ChangeNotifier {
   ProfileProvider(this._profileRepository);
 
   PersonalDetails? _personalDetails;
-  MedicalProfile? _medicalProfile;
   bool _isLoading = false;
   String? _errorMessage;
   bool _isUploading = false;
@@ -28,7 +26,7 @@ class ProfileProvider extends ChangeNotifier {
   // ══════════════════════════════════════════════════════════════════════════
 
   PersonalDetails? get personalDetails => _personalDetails;
-  MedicalProfile? get medicalProfile => _medicalProfile;
+
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
   bool get isUploading => _isUploading;
@@ -45,11 +43,9 @@ class ProfileProvider extends ChangeNotifier {
   String? get address => _personalDetails?.address;
   String? get profilePhotoUrl => _personalDetails?.profilePhotoUrl;
 
-  // Medical profile convenience getters
-  List<String>? get allergies => _medicalProfile?.allergies;
-  List<String>? get medications => _medicalProfile?.currentMedications;
-  List<String>? get conditions => _medicalProfile?.chronicConditions;
+ 
 
+    
   // ══════════════════════════════════════════════════════════════════════════
   // LOAD PROFILE
   // ══════════════════════════════════════════════════════════════════════════
@@ -87,39 +83,6 @@ class ProfileProvider extends ChangeNotifier {
     }
   }
 
-  /// Load medical profile from backend
-  Future<void> loadMedicalProfile() async {
-    _isLoading = true;
-    _errorMessage = null;
-    notifyListeners();
-
-    try {
-      log('📥 Loading medical profile');
-
-      _medicalProfile = await _profileRepository.getMedicalProfile();
-
-      log('✅ Medical profile loaded');
-      _isLoading = false;
-      notifyListeners();
-    } catch (e) {
-      log('❌ Failed to load medical profile: $e');
-      _errorMessage = e.toString();
-      _isLoading = false;
-      notifyListeners();
-      rethrow;
-    }
-  }
-
-  /// Load complete profile (personal + medical)
-  Future<void> loadProfile() async {
-    await loadPersonalDetails();
-    try {
-      await loadMedicalProfile();
-    } catch (e) {
-      // Medical profile is optional, don't fail if it doesn't exist
-      log('⚠️ Medical profile not loaded: $e');
-    }
-  }
 
   // ══════════════════════════════════════════════════════════════════════════
   // UPDATE PROFILE
@@ -127,6 +90,7 @@ class ProfileProvider extends ChangeNotifier {
 
   /// Update personal details
   Future<void> updatePersonalDetails({
+    String? email,
     String? fullName,
     int? age,
     String? gender,
@@ -144,6 +108,7 @@ class ProfileProvider extends ChangeNotifier {
       log('📝 Updating personal details');
 
       await _profileRepository.updatePersonalDetailField(
+        email: email ?? _personalDetails?.email,
         fullName: fullName,
         age: age,
         gender: gender,
@@ -167,13 +132,7 @@ class ProfileProvider extends ChangeNotifier {
     }
   }
 
-  // ══════════════════════════════════════════════════════════════════════════
-  // PROFILE PHOTO OPERATIONS
-  // ══════════════════════════════════════════════════════════════════════════
-
-  /// Upload profile photo
-  ///
-  /// [imageFile] - Image file to upload
+  
   Future<void> uploadProfilePhoto(File imageFile) async {
     _isUploading = true;
     _uploadProgress = 0.0;
@@ -249,33 +208,7 @@ class ProfileProvider extends ChangeNotifier {
     }
   }
 
-  // ══════════════════════════════════════════════════════════════════════════
-  // REFRESH PROFILE
-  // ══════════════════════════════════════════════════════════════════════════
 
-  /// Refresh profile (pull-to-refresh)
-  Future<void> refreshProfile() async {
-    try {
-      await Future.wait([
-        _profileRepository.getPersonalDetails().then((details) {
-          _personalDetails = details;
-        }),
-        _profileRepository
-            .getMedicalProfile()
-            .then((profile) {
-              _medicalProfile = profile;
-            })
-            .catchError((e) {
-              // Medical profile is optional
-              log('⚠️ Medical profile not loaded: $e');
-            }),
-      ]);
-      notifyListeners();
-    } catch (e) {
-      log('⚠️ Failed to refresh profile: $e');
-      // Don't throw - this is a background refresh
-    }
-  }
 
   // ══════════════════════════════════════════════════════════════════════════
   // CLEAR
@@ -284,7 +217,6 @@ class ProfileProvider extends ChangeNotifier {
   /// Clear profile data (on logout)
   void clear() {
     _personalDetails = null;
-    _medicalProfile = null;
     _isLoading = false;
     _errorMessage = null;
     _isUploading = false;

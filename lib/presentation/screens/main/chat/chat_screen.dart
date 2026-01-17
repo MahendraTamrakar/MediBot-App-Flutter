@@ -21,6 +21,8 @@ class ChatScreen extends StatefulWidget {
 }
 
 class _ChatScreenState extends State<ChatScreen> {
+    bool _drawerOpening = false;
+    int _prevMessageCount = 0;
   final ScrollController _scrollController = ScrollController();
   File? _attachedFile;
 
@@ -31,6 +33,19 @@ class _ChatScreenState extends State<ChatScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         context.read<ChatProvider>().newConversation();
+      }
+    });
+  }
+
+  void onDrawerOpen() {
+    setState(() {
+      _drawerOpening = true;
+    });
+    Future.delayed(const Duration(milliseconds: 500), () {
+      if (mounted) {
+        setState(() {
+          _drawerOpening = false;
+        });
       }
     });
   }
@@ -219,13 +234,15 @@ class _ChatScreenState extends State<ChatScreen> {
     return Consumer<ChatProvider>(
       builder: (context, chatProvider, child) {
         final hasMessages = chatProvider.hasMessages;
+        final currentMessageCount = chatProvider.messages.length;
 
-        // Auto-scroll when new message arrives
-        if (hasMessages) {
+        // Only auto-scroll when a new message arrives
+        if (hasMessages && !_drawerOpening && currentMessageCount > _prevMessageCount) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             _scrollToBottom();
           });
         }
+        _prevMessageCount = currentMessageCount;
 
         return Scaffold(
           extendBodyBehindAppBar: true,
@@ -257,7 +274,10 @@ class _ChatScreenState extends State<ChatScreen> {
                   child: IconButton(
                     padding: EdgeInsets.zero,
                     icon: const Icon(Icons.menu_rounded, size: 24),
-                    onPressed: widget.onMenuPressed,
+                    onPressed: () {
+                      onDrawerOpen();
+                      widget.onMenuPressed();
+                    },
                   ),
                 ),
               ),
@@ -636,7 +656,7 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 
-  Widget _buildDot(int index) {
+  /* Widget _buildDot(int index) {
     final theme = Theme.of(context);
     return TweenAnimationBuilder<double>(
       tween: Tween(begin: 0.0, end: 1.0),
@@ -663,7 +683,7 @@ class _ChatScreenState extends State<ChatScreen> {
         if (mounted) setState(() {});
       },
     );
-  }
+  } */
 
   Widget _buildErrorMessage(String error) {
     return Container(

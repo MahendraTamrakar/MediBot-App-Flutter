@@ -17,19 +17,7 @@ class UserRepository {
   })  : _userApiService = userApiService,
         _secureStorage = secureStorage;
 
-  // ══════════════════════════════════════════════════════════════════════════
-  // DELETE ACCOUNT
-  // ══════════════════════════════════════════════════════════════════════════
-
-  /// Delete the current user's account (hard delete)
-  /// 
-  /// This will permanently delete:
-  /// - User account
-  /// - All chat history
-  /// - All medical reports
-  /// - All profile data
-  /// 
-  /// Returns true if successful
+  //hard delete - deletes all data of current's user
   Future<bool> deleteAccount() async {
     try {
       // Call API to delete account on backend

@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:medibot/core/constants/api_constants.dart';
 import 'package:medibot/presentation/navigation/auth_router.dart';
+import 'package:medibot/presentation/providers/profile/profile_provider.dart';
+import 'package:medibot/presentation/providers/theme/theme_provider.dart';
+import 'package:medibot/presentation/screens/settings/widgets/theme_radio_tile.dart';
 import 'package:provider/provider.dart';
 import 'package:medibot/presentation/screens/settings/widgets/proifle_header.dart';
 import 'package:medibot/presentation/screens/settings/widgets/setting_card.dart';
@@ -56,13 +60,30 @@ class SettingsScreen extends StatelessWidget {
       body: Consumer<AuthProvider>(
         builder: (context, authProvider, child) {
           final user = authProvider.currentUser;
-
+          String displayText = 'User';
+          if (user != null) {
+            if (user.displayName != null && user.displayName!.isNotEmpty) {
+              displayText = user.displayName!;
+            } else if (user.email.isNotEmpty) {
+              displayText = user.email.split('@').first;
+            }
+          }
           return ListView(
             children: [
               ProfileHeader(
-                name: user?.displayName ?? 'User',
+                name: displayText,
                 email: user?.email ?? 'No email',
-                photoUrl: user?.photoUrl,
+                photoUrl: (() {
+                  final profilePhotoUrl = context.watch<ProfileProvider>().profilePhotoUrl;
+                  final url = profilePhotoUrl ?? user?.photoUrl;
+                  final resolved = (url != null && url.isNotEmpty)
+                      ? ApiConstants.resolveImageUrl(url)
+                      : null;
+                  // Debug print
+                  // ignore: avoid_print
+                  print('[ProfileHeader] Resolved photoUrl: $resolved');
+                  return resolved;
+                })(),
               ),
               const SizedBox(height: 8),
               SettingCard(
@@ -70,12 +91,12 @@ class SettingsScreen extends StatelessWidget {
                   SettingTile(
                     icon: Icons.brightness_7_rounded,
                     title: 'Appearance',
-                    onTap: () {},
+                    onTap: () => _showThemeDialog(context),
                   ),
                   SettingTile(
                     icon: Icons.private_connectivity,
-                    title: 'Data Control',
-                    onTap: () {},
+                    title: 'Data controls',
+                    onTap: () => Navigator.of(context).pushNamed(AppRoutes.dataControl),
                   ),
                 ],
               ),
@@ -159,4 +180,68 @@ class SettingsScreen extends StatelessWidget {
       }
     }
   }
+
+  void _showThemeDialog(BuildContext context) async {
+    final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
+    ThemeMode tempTheme = themeProvider.themeMode;
+    final theme = Theme.of(context);
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: const Text('Appearance', style: TextStyle(fontSize: 22)),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  ThemeRadioTile(
+                    label: 'Light',
+                    value: ThemeMode.light,
+                    groupValue: tempTheme,
+                    onChanged: (mode) {
+                      setState(() => tempTheme = ThemeMode.light);
+                    },
+                  ),
+                  ThemeRadioTile(
+                    label: 'Dark',
+                    value: ThemeMode.dark,
+                    groupValue: tempTheme,
+                    onChanged: (mode) {
+                      setState(() => tempTheme = ThemeMode.dark);
+                    },
+                  ),
+                  ThemeRadioTile(
+                    label: 'System (Default)',
+                    value: ThemeMode.system,
+                    groupValue: tempTheme,
+                    onChanged: (mode) {
+                      setState(() => tempTheme = ThemeMode.system);
+                    },
+                  ),
+                ],
+              ),
+              actions: [
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: TextButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                          Future.delayed(const Duration(milliseconds: 150), () {
+                            themeProvider.setTheme(tempTheme);
+                          });
+                        },
+                        child: const Text('Ok'),
+                      ),
+                    ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
 }

@@ -56,7 +56,8 @@ class ApiClient {
           }
 
           // Log request (only in debug mode)
-          log('📤 REQUEST: ${options.method} ${options.path}');
+          log('📤 REQUEST: ${options.method} ${options.baseUrl}${options.path}');
+          log('   JWT Token: $token');
           if (options.queryParameters.isNotEmpty) {
             log('   Query: ${options.queryParameters}');
           }

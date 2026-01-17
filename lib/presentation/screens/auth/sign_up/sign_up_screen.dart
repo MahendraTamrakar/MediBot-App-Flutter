@@ -7,7 +7,6 @@ import 'package:medibot/presentation/common_widgets/input/password_field.dart';
 import 'package:medibot/presentation/common_widgets/loaders/loading_indicator.dart';
 import 'package:medibot/presentation/navigation/auth_router.dart';
 import 'package:medibot/presentation/providers/auth/auth_provider.dart';
-import 'package:medibot/presentation/theme/app_theme.dart';
 import 'package:provider/provider.dart';
 
 class SignUpScreen extends StatefulWidget {

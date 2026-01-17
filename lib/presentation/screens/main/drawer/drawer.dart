@@ -1,6 +1,9 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:medibot/core/constants/api_constants.dart';
 import 'package:medibot/presentation/navigation/auth_router.dart';
 import 'package:medibot/presentation/providers/auth/auth_provider.dart';
+import 'package:medibot/presentation/providers/profile/profile_provider.dart';
 import 'package:medibot/presentation/screens/main/drawer/widgets/chat_history_items.dart';
 import 'package:medibot/presentation/screens/main/drawer/widgets/chat_option_sheet.dart';
 import 'package:provider/provider.dart';
@@ -204,21 +207,20 @@ class _DrawerMenuState extends State<DrawerMenu> {
                 builder: (context, authProvider, child) {
                   final user = authProvider.currentUser;
                   String displayText = 'Guest';
-                  
                   if (user != null) {
-                    if (user.firstName != null && user.firstName!.isNotEmpty) {
-                      displayText = user.firstName!;
-                    } else {
+                    if (user.displayName != null && user.displayName!.isNotEmpty) {
+                      displayText = user.displayName!.split(' ').first;
+                    } else if (user.email.isNotEmpty) {
                       displayText = user.email.split('@').first;
                     }
                   }
-                  
                   return Text(
                     displayText,
                     style: theme.textTheme.bodyLarge?.copyWith(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
                     ),
+                    overflow: TextOverflow.fade,
                   );
                 },
               ),
@@ -245,7 +247,7 @@ class _DrawerMenuState extends State<DrawerMenu> {
             onTap: _onNewChat,
           ),
           _drawerItem(Icons.file_upload_rounded, "Upload Medical Report"),
-          _drawerItem(Icons.person_2_rounded, "Medical Profile"),
+          _drawerItem(Icons.health_and_safety, "BMI Calculator"),
 
           const SizedBox(height: 2),
           Divider(
@@ -274,8 +276,22 @@ class _DrawerMenuState extends State<DrawerMenu> {
   }
 
   Widget _buildUserAvatar(ThemeData theme) {
+    final profilePhotoUrl = context.watch<ProfileProvider>().profilePhotoUrl;
     final authProvider = context.watch<AuthProvider>();
-    final photoUrl = authProvider.currentUser?.photoUrl;
+    final fallbackPhotoUrl = authProvider.currentUser?.photoUrl;
+
+
+    final displayPhotoUrl = (profilePhotoUrl != null && profilePhotoUrl.isNotEmpty)
+      ? profilePhotoUrl
+      : (fallbackPhotoUrl != null && fallbackPhotoUrl.isNotEmpty)
+        ? fallbackPhotoUrl
+        : null;
+
+    final resolvedPhotoUrl = (displayPhotoUrl != null && displayPhotoUrl.isNotEmpty)
+      ? ApiConstants.resolveImageUrl(displayPhotoUrl)
+      : null;
+    // ignore: avoid_print
+    print('[Drawer] Resolved photoUrl: $resolvedPhotoUrl');
 
     return Container(
       width: 48,
@@ -285,11 +301,11 @@ class _DrawerMenuState extends State<DrawerMenu> {
         shape: BoxShape.circle,
       ),
       child: ClipOval(
-        child: photoUrl != null && photoUrl.isNotEmpty
-            ? Image.network(
-                photoUrl,
+        child: resolvedPhotoUrl != null
+            ? CachedNetworkImage(
+                imageUrl: resolvedPhotoUrl,
                 fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => const Icon(
+                errorWidget: (_, __, ___) => const Icon(
                   Icons.person,
                   size: 18,
                   color: Colors.white,

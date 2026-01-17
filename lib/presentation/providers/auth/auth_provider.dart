@@ -123,6 +123,37 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
+
+  Future<void> deleteAccount() async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      log('🗑️ Deleting account...');
+
+      // Call repository to delete account
+      final success = await _authRepository.deleteAccount();
+
+      if (success) {
+        // Clear local user data
+        _currentUser = null;
+        
+        log('✅ Account deleted successfully');
+        _isLoading = false;
+        notifyListeners();
+      } else {
+        throw Exception('Failed to delete account');
+      }
+    } catch (e) {
+      log('❌ Failed to delete account: $e');
+      _errorMessage = e.toString();
+      _isLoading = false;
+      notifyListeners();
+      rethrow;
+    }
+  }
+
   // ══════════════════════════════════════════════════════════════════════════
   // SIGN IN
   // ══════════════════════════════════════════════════════════════════════════

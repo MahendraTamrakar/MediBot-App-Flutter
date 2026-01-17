@@ -2,7 +2,7 @@ import 'package:dio/dio.dart';
 import 'dart:io';
 import 'api_client.dart';
 import '../../models/profile/personal_details.dart';
-import '../../models/profile/medical_profile.dart';
+
 import '../../../core/constants/api_constants.dart';
 
 /// Profile API service - Handles all profile-related endpoints
@@ -11,15 +11,9 @@ class ProfileApiService {
 
   ProfileApiService(this._apiClient);
 
-  // ══════════════════════════════════════════════════════════════════════════
-  // SAVE PROFILE
-  // ══════════════════════════════════════════════════════════════════════════
-
-  /// Save or update user profile (personal details + medical profile)
   /// POST /user/profile
   Future<void> saveProfile({
     PersonalDetails? personalDetails,
-    MedicalProfile? medicalProfile,
   }) async {
     try {
       final data = <String, dynamic>{};
@@ -28,9 +22,6 @@ class ProfileApiService {
         data['personal_details'] = personalDetails.toJson();
       }
 
-      if (medicalProfile != null) {
-        data['medical_profile'] = medicalProfile.toJson();
-      }
 
       await _apiClient.post(ApiConstants.saveProfile, data: data);
     } on DioException catch (e) {
@@ -38,8 +29,7 @@ class ProfileApiService {
     }
   }
 
-  /// Save only personal details
-  /// POST /user/profile
+ 
   Future<void> savePersonalDetails(PersonalDetails personalDetails) async {
     try {
       await _apiClient.post(
@@ -51,24 +41,9 @@ class ProfileApiService {
     }
   }
 
-  /// Save only medical profile
-  /// POST /user/profile
-  Future<void> saveMedicalProfile(MedicalProfile medicalProfile) async {
-    try {
-      await _apiClient.post(
-        ApiConstants.saveProfile,
-        data: {'medical_profile': medicalProfile.toJson()},
-      );
-    } on DioException catch (e) {
-      throw _handleError(e);
-    }
-  }
+  
 
-  // ══════════════════════════════════════════════════════════════════════════
-  // GET PROFILE
-  // ══════════════════════════════════════════════════════════════════════════
 
-  /// Get user profile (returns personal_details only based on your backend)
   /// GET /user/profile
   Future<PersonalDetails> getProfile() async {
     try {
@@ -88,17 +63,7 @@ class ProfileApiService {
     }
   }
 
-  // ══════════════════════════════════════════════════════════════════════════
-  // PROFILE PHOTO OPERATIONS
-  // ══════════════════════════════════════════════════════════════════════════
-
-  /// Upload profile photo
-  /// POST /user/profile/photo
-  ///
-  /// [imageFile] - Image file to upload
-  /// [onProgress] - Callback for upload progress (0.0 to 1.0)
-  ///
-  /// Returns the URL of the uploaded photo
+ 
   Future<String> uploadProfilePhoto(
     File imageFile, {
     Function(double)? onProgress,
@@ -143,27 +108,7 @@ class ProfileApiService {
     }
   }
 
-  // ══════════════════════════════════════════════════════════════════════════
-  // GET MEDICAL PROFILE
-  // ══════════════════════════════════════════════════════════════════════════
-
-  /// Get medical profile
-  /// GET /user/medical-profile
-  Future<MedicalProfile> getMedicalProfile() async {
-    try {
-      final response = await _apiClient.get(ApiConstants.getMedicalProfile);
-
-      final data = response.data as Map<String, dynamic>;
-
-      if (data.isEmpty) {
-        return MedicalProfile();
-      }
-
-      return MedicalProfile.fromJson(data);
-    } on DioException catch (e) {
-      throw _handleError(e);
-    }
-  }
+  
 
   // ══════════════════════════════════════════════════════════════════════════
   // ERROR HANDLING

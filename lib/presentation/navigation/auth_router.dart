@@ -8,6 +8,7 @@ import 'package:medibot/presentation/screens/auth/sign_up/sign_up_screen.dart';
 import 'package:medibot/presentation/screens/main/chat/chat_screen.dart';
 import 'package:medibot/presentation/screens/main/drawer/widgets/drawer_animation.dart';
 import 'package:medibot/presentation/screens/onboarding/onboarding_screen.dart';
+import 'package:medibot/presentation/screens/settings/data_control_screen.dart';
 import 'package:medibot/presentation/screens/settings/edit_profile_screen.dart';
 import 'package:medibot/presentation/screens/settings/setting_screen.dart';
 
@@ -93,17 +94,17 @@ class AppRouter {
           settings: settings,
         );
 
-      /*
-      case AppRoutes.chat:
-        // Get session ID from arguments (optional)
-        final sessionId = settings.arguments as String?;
+      
+      case AppRoutes.dataControl:
+       
+        
         return MaterialPageRoute(
           builder: (_) => AuthGuard(
-            child: ChatScreen(sessionId: sessionId),
+            child: DataControlScreen(),
           ),
           settings: settings,
         );
-
+      /*
       case AppRoutes.chatHistory:
         return MaterialPageRoute(
           builder: (_) => const AuthGuard(child: ChatHistoryScreen()),
@@ -214,6 +215,7 @@ class AppRoutes {
   static const String profile = '/profile';
   static const String editProfile = '/edit-profile';
   static const String settings = '/settings';
+  static const String dataControl = '/data-control';
   static const String reports = '/reports';
   static const String reportDetail = '/report-detail';
 

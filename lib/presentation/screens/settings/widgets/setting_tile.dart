@@ -5,11 +5,13 @@ class SettingTile extends StatelessWidget {
   final String title;
   final VoidCallback? onTap;
   final Color? textColor;
+  final String? label;
 
   const SettingTile({
     super.key,
     required this.icon,
     required this.title,
+    this.label,
     this.onTap,
     this.textColor,
   });
@@ -17,6 +19,7 @@ class SettingTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final width = MediaQuery.of(context).size.width;
 
     return Material(
       color: Colors.transparent,
@@ -37,14 +40,32 @@ class SettingTile extends StatelessWidget {
                 size: 28,
               ),
               const SizedBox(width: 16),
-              Expanded(
-                child: Text(
-                  title,
-                  style: theme.textTheme.bodyLarge?.copyWith(
-                    fontSize: 15,
-                    color: textColor,
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: theme.textTheme.bodyLarge?.copyWith(
+                      fontSize: 15,
+                      color: textColor,
+                    ),
                   ),
-                ),
+                  if (label != null)
+                    SizedBox(
+                      width: width*0.7,
+                      child: Text(
+                        label!,
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          fontSize: 12,
+                          color: textColor,
+                          fontWeight: FontWeight.w300
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.visible,
+                        softWrap: true,
+                      ),
+                    ),
+                ],
               ),
             ],
           ),

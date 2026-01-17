@@ -89,6 +89,14 @@ class ChatProvider extends ChangeNotifier {
         return;
       }
 
+        // Log all fields of ChatResponse for debugging
+        log('🟢 Backend response:'
+          '\n  sessionId: [32m${response.sessionId}[0m'
+          '\n  title: [32m${response.title}[0m'
+          '\n  response: [32m${response.response}[0m'
+          '\n  emergencyLevel: [32m${response.emergencyLevel}[0m'
+          '\n  followUpQuestions: [32m${response.followUpQuestions}[0m');
+
       // Update session ID if new session was created
       if (response.sessionId != null && _currentSessionId != response.sessionId) {
         _currentSessionId = response.sessionId;
@@ -112,6 +120,9 @@ class ChatProvider extends ChangeNotifier {
         return;
       }
       log('❌ Error sending message: $e');
+      if (e is Exception && e.toString().contains('DioException')) {
+        log('❌ DioException details: $e');
+      }
       _errorMessage = e.toString();
       _isTyping = false;
       notifyListeners();
@@ -262,6 +273,30 @@ class ChatProvider extends ChangeNotifier {
     }).catchError((e) {
       print('⚠️ Failed to refresh chat sessions: $e');
     });
+  }
+
+  //delete all chats
+  Future<int> deleteAllChats() async {
+    try {
+      log('🗑️ Deleting all chats');
+      
+      final deletedCount = await _chatRepository.deleteAllChats();
+      
+      // Clear local messages
+      _messages.clear();
+      _currentSessionId = null;
+      _errorMessage = null;
+      
+      log('✅ Deleted $deletedCount chat sessions');
+      notifyListeners();
+      
+      return deletedCount;
+    } catch (e) {
+      log('❌ Failed to delete all chats: $e');
+      _errorMessage = e.toString();
+      notifyListeners();
+      rethrow;
+    }
   }
 
   // ══════════════════════════════════════════════════════════════════════════
