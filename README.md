@@ -78,11 +78,11 @@ medibot/
 <table>
 	<tr>
 		<td><img src="assets/screenshots/onboardingscreen.png" alt="Onboarding Screen" width="250"></td>
-        <td><img src="assets/screenshots/newchatScreen.png" alt="New Chat Screen" width="250"></td>
-		<td><img src="assets/screenshots/chatscreen.png" alt="Chatbot Screen" width="250"></td>
+        <td><img src="assets/screenshots/siginscreen.png" alt="Sign In Screen" width="250"></td>
+        <td><img src="assets/screenshots/newchatScreen.png" alt="New Chat Screen" width="250"></td>        
 	</tr>
 	<tr>
-		<td><img src="assets/screenshots/profilescreen.png" alt="Profile Screen" width="250"></td>
+		<td><img src="assets/screenshots/chatscreen.png" alt="Chatbot Screen" width="250"></td>
         <td><img src="assets/screenshots/setting screen.png" alt="Setting Screen" width="250"></td>
 	</tr>
 </table>
