@@ -74,7 +74,6 @@ medibot/
 
 
 ## Screenshots
-<center>
 <table>
 	<tr>
 		<td><img src="assets/screenshots/onboardingscreen.png" alt="Onboarding Screen" width="250"></td>
@@ -86,7 +85,6 @@ medibot/
         <td><img src="assets/screenshots/setting screen.png" alt="Setting Screen" width="250"></td>
 	</tr>
 </table>
-<center>
 
 ---
 
