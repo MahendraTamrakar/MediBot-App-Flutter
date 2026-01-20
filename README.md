@@ -77,7 +77,7 @@ medibot/
 <table>
 	<tr>
 		<td><img src="assets/screenshots/onboardingscreen.png" alt="Onboarding Screen" width="250"></td>
-        <td><img src="assets/screenshots/siginscreen.png" alt="Sign In Screen" width="250"></td>
+        <td><img src="assets/screenshots/signinscreen.png" alt="Sign In Screen" width="250"></td>
         <td><img src="assets/screenshots/newchatScreen.png" alt="New Chat Screen" width="250"></td>        
 	</tr>
 	<tr>
