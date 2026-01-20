@@ -1,26 +1,5 @@
 import 'package:flutter/material.dart';
 
-/// Navigation service for navigating without BuildContext
-/// 
-/// Useful for:
-/// - Navigating from providers
-/// - Navigating from repositories
-/// - Navigating from services
-/// - Deep linking
-/// 
-/// Usage:
-/// ```dart
-/// // 1. Setup in MaterialApp
-/// MaterialApp(
-///   navigatorKey: NavigationService.navigatorKey,
-///   onGenerateRoute: AppRouter.generateRoute,
-/// )
-/// 
-/// // 2. Navigate from anywhere (no context needed)
-/// NavigationService.navigateTo('/home');
-/// NavigationService.navigateToReplacement('/signin');
-/// NavigationService.goBack();
-/// ```
 class NavigationService {
   // Global navigator key
   static final GlobalKey<NavigatorState> navigatorKey =

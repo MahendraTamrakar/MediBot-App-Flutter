@@ -6,6 +6,7 @@ import 'package:medibot/presentation/providers/auth/auth_provider.dart';
 import 'package:medibot/presentation/providers/profile/profile_provider.dart';
 import 'package:medibot/presentation/screens/main/drawer/widgets/chat_history_items.dart';
 import 'package:medibot/presentation/screens/main/drawer/widgets/chat_option_sheet.dart';
+import 'package:medibot/services/connectivity_service.dart';
 import 'package:provider/provider.dart';
 import 'package:medibot/presentation/providers/chat/chat_provider.dart';
 import 'package:medibot/data/models/chat/chat_session.dart';
@@ -30,13 +31,39 @@ class _DrawerMenuState extends State<DrawerMenu> {
     });
   }
 
-  void _onNewChat() {
+  Future<void> _onNewChat() async {
+    final connectivityService = Provider.of<ConnectivityService>(context, listen: false);
+    final isConnected = await connectivityService.hasConnection();
+    if (!isConnected) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Internet not connected'),
+            backgroundColor: Color.fromARGB(255, 189, 189, 189),
+          ),
+        );
+      }
+      return;
+    }
     final chatProvider = context.read<ChatProvider>();
     chatProvider.newConversation();
     widget.onNewChat?.call();
   }
 
-  void _onChatTap(ChatSession session) {
+  Future<void> _onChatTap(ChatSession session) async {
+    final connectivityService = Provider.of<ConnectivityService>(context, listen: false);
+    final isConnected = await connectivityService.hasConnection();
+    if (!isConnected) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Internet not connected'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+      return;
+    }
     final chatProvider = context.read<ChatProvider>();
     chatProvider.loadChatSession(session.sessionId);
     widget.onChatSelected?.call();
@@ -246,8 +273,7 @@ class _DrawerMenuState extends State<DrawerMenu> {
             "New Chat",
             onTap: _onNewChat,
           ),
-          _drawerItem(Icons.file_upload_rounded, "Upload Medical Report"),
-          _drawerItem(Icons.health_and_safety, "BMI Calculator"),
+          //_drawerItem(Icons.health_and_safety, "BMI Calculator"),
 
           const SizedBox(height: 2),
           Divider(

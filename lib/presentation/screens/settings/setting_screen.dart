@@ -233,7 +233,9 @@ class SettingsScreen extends StatelessWidget {
                             themeProvider.setTheme(tempTheme);
                           });
                         },
-                        child: const Text('Ok'),
+                        child: Text('Ok',style: theme.textTheme.bodyLarge?.copyWith(
+                          fontWeight: FontWeight.w500,
+                        ),),
                       ),
                     ),
               ],

@@ -1,6 +1,8 @@
+import 'dart:convert';
+
 import '../data_sources/remote/profile_api_service.dart';
 import '../models/profile/personal_details.dart';
-
+import '../data_sources/local/database_service.dart';
 import 'dart:io';
 
 /// Profile repository - Business logic for profile operations
@@ -29,37 +31,42 @@ class ProfileRepository {
 
       await _profileApiService.savePersonalDetails(personalDetails);
 
-      // Optional: Cache locally
-      // await _cachePersonalDetails(personalDetails);
+      // Cache locally
+      await DatabaseService().saveSetting('personal_details', personalDetails.toJson());
     } catch (e) {
       throw Exception('Failed to save personal details: $e');
     }
   }
 
-  /// Get personal details
-  ///
-  /// Returns user's personal information
+
   Future<PersonalDetails> getPersonalDetails() async {
     try {
       final details = await _profileApiService.getProfile();
-
-      // Optional: Cache for offline access
-      // await _cachePersonalDetails(details);
-
+      // Cache for offline access
+      await DatabaseService().saveSetting('personal_details', details.toJson());
       return details;
     } catch (e) {
       // Try to get from cache if API fails
-      // final cached = await _getCachedPersonalDetails();
-      // if (cached != null) return cached;
-
+      final cached = await getCachedPersonalDetails();
+      if (cached != null) return cached;
       throw Exception('Failed to get personal details: $e');
     }
   }
 
-  /// Update specific personal detail field
-  ///
-  /// This is a convenience method to update a single field
-  /// without fetching and re-saving the entire profile
+  Future<PersonalDetails?> getCachedPersonalDetails() async {
+    final data = await DatabaseService().getSetting('personal_details');
+    if (data is Map) {
+      return PersonalDetails.fromJson(Map<String, dynamic>.from(data));
+    } else if (data is String) {
+      // If stored as JSON string
+      try {
+        return PersonalDetails.fromJson(Map<String, dynamic>.from(jsonDecode(data)));
+      } catch (_) {}
+    }
+    return null;
+  }
+
+
   Future<void> updatePersonalDetailField({
     String? email,
     String? fullName,

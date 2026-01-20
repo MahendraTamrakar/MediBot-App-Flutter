@@ -1,25 +1,10 @@
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/constants/storage_keys.dart';
 
-/// SharedPreferences service for non-sensitive settings and preferences
-/// 
-/// Use this for:
-/// - App settings (theme, language, etc.)
-/// - User preferences
-/// - Flags and toggles
-/// - Non-sensitive data
-/// 
-/// DO NOT use for:
-/// - Tokens or passwords (use SecureStorage)
-/// - Large data (use Database/Hive)
 class SharedPrefsService {
   final SharedPreferences _prefs;
 
   SharedPrefsService(this._prefs);
-
-  // ══════════════════════════════════════════════════════════════════════════
-  // THEME SETTINGS
-  // ══════════════════════════════════════════════════════════════════════════
 
   /// Save theme mode ('light', 'dark', or 'system')
   Future<void> saveThemeMode(String themeMode) async {
@@ -35,58 +20,6 @@ class SharedPrefsService {
   bool isDarkMode() {
     return getThemeMode() == 'dark';
   }
-
-  // ══════════════════════════════════════════════════════════════════════════
-  // LANGUAGE SETTINGS
-  // ══════════════════════════════════════════════════════════════════════════
-
-  /// Save language code (e.g., 'en', 'es', 'hi')
-  Future<void> saveLanguage(String languageCode) async {
-    await _prefs.setString(StorageKeys.languageCode, languageCode);
-  }
-
-  /// Get language code
-  String? getLanguage() {
-    return _prefs.getString(StorageKeys.languageCode);
-  }
-
-  // ══════════════════════════════════════════════════════════════════════════
-  // NOTIFICATION SETTINGS
-  // ══════════════════════════════════════════════════════════════════════════
-
-  /// Save notification enabled state
-  Future<void> setNotificationsEnabled(bool enabled) async {
-    await _prefs.setBool(StorageKeys.notificationsEnabled, enabled);
-  }
-
-  /// Check if notifications are enabled
-  bool areNotificationsEnabled() {
-    return _prefs.getBool(StorageKeys.notificationsEnabled) ?? true;
-  }
-
-  /// Save sound enabled state
-  Future<void> setSoundEnabled(bool enabled) async {
-    await _prefs.setBool(StorageKeys.soundEnabled, enabled);
-  }
-
-  /// Check if sound is enabled
-  bool isSoundEnabled() {
-    return _prefs.getBool(StorageKeys.soundEnabled) ?? true;
-  }
-
-  /// Save vibration enabled state
-  Future<void> setVibrationEnabled(bool enabled) async {
-    await _prefs.setBool(StorageKeys.vibrationEnabled, enabled);
-  }
-
-  /// Check if vibration is enabled
-  bool isVibrationEnabled() {
-    return _prefs.getBool(StorageKeys.vibrationEnabled) ?? true;
-  }
-
-  // ══════════════════════════════════════════════════════════════════════════
-  // APP LIFECYCLE
-  // ══════════════════════════════════════════════════════════════════════════
 
   /// Save first launch date
   Future<void> saveFirstLaunchDate() async {
@@ -124,9 +57,6 @@ class SharedPrefsService {
     return lastVersion != null && lastVersion != currentVersion;
   }
 
-  // ══════════════════════════════════════════════════════════════════════════
-  // ANALYTICS & CONSENT
-  // ══════════════════════════════════════════════════════════════════════════
 
   /// Save analytics enabled state
   Future<void> setAnalyticsEnabled(bool enabled) async {
@@ -158,9 +88,6 @@ class SharedPrefsService {
     return _prefs.getBool(StorageKeys.dataCollectionConsent) ?? false;
   }
 
-  // ══════════════════════════════════════════════════════════════════════════
-  // CACHE MANAGEMENT
-  // ══════════════════════════════════════════════════════════════════════════
 
   /// Save last sync timestamp
   Future<void> saveLastSyncTime() async {
@@ -190,9 +117,6 @@ class SharedPrefsService {
     return difference > maxAge;
   }
 
-  // ══════════════════════════════════════════════════════════════════════════
-  // CUSTOM KEY-VALUE OPERATIONS
-  // ══════════════════════════════════════════════════════════════════════════
 
   /// Save string value
   Future<void> setString(String key, String value) async {
@@ -254,10 +178,6 @@ class SharedPrefsService {
     return _prefs.containsKey(key);
   }
 
-  // ══════════════════════════════════════════════════════════════════════════
-  // CLEAR DATA
-  // ══════════════════════════════════════════════════════════════════════════
-
   /// Clear all data
   Future<void> clearAll() async {
     await _prefs.clear();
@@ -272,10 +192,6 @@ class SharedPrefsService {
       await _prefs.remove(key);
     }
   }
-
-  // ══════════════════════════════════════════════════════════════════════════
-  // UTILITY METHODS
-  // ══════════════════════════════════════════════════════════════════════════
 
   /// Get all keys
   Set<String> getAllKeys() {

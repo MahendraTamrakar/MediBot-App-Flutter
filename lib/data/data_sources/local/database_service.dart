@@ -3,42 +3,16 @@ import '../../../core/constants/storage_keys.dart';
 import '../../models/chat/chat_message.dart';
 import '../../models/chat/chat_session.dart';
 
-/// Local database service using Hive
-/// 
-/// Use this for:
-/// - Offline caching of chat messages
-/// - Offline caching of chat sessions
-/// - Any structured data that needs to be stored locally
-/// 
-/// Benefits of Hive:
-/// - Fast (faster than SQLite)
-/// - NoSQL (flexible schema)
-/// - Type-safe with adapters
-/// - Works on all platforms
 class DatabaseService {
-  // ══════════════════════════════════════════════════════════════════════════
-  // INITIALIZATION
-  // ══════════════════════════════════════════════════════════════════════════
 
-  /// Initialize Hive database
-  /// 
-  /// Call this once in main.dart before runApp()
   static Future<void> init() async {
     await Hive.initFlutter();
 
-    // Register adapters if using custom models
-    // Hive.registerAdapter(ChatMessageAdapter());
-    // Hive.registerAdapter(ChatSessionAdapter());
-
-    // Open boxes
     await Hive.openBox(StorageKeys.chatMessagesBox);
     await Hive.openBox(StorageKeys.chatSessionsBox);
     await Hive.openBox(StorageKeys.settingsBox);
   }
 
-  // ══════════════════════════════════════════════════════════════════════════
-  // CHAT MESSAGES
-  // ══════════════════════════════════════════════════════════════════════════
 
   /// Save chat message to local database
   Future<void> saveChatMessage(String sessionId, ChatMessage message) async {
@@ -91,9 +65,6 @@ class DatabaseService {
     await box.clear();
   }
 
-  // ══════════════════════════════════════════════════════════════════════════
-  // CHAT SESSIONS
-  // ══════════════════════════════════════════════════════════════════════════
 
   /// Save chat session to local database
   Future<void> saveChatSession(ChatSession session) async {
@@ -147,9 +118,7 @@ class DatabaseService {
     await deleteAllChatMessages();
   }
 
-  // ══════════════════════════════════════════════════════════════════════════
-  // GENERIC KEY-VALUE OPERATIONS
-  // ══════════════════════════════════════════════════════════════════════════
+
 
   /// Save any data to settings box
   Future<void> saveSetting(String key, dynamic value) async {
@@ -169,9 +138,7 @@ class DatabaseService {
     await box.delete(key);
   }
 
-  // ══════════════════════════════════════════════════════════════════════════
-  // UTILITY METHODS
-  // ══════════════════════════════════════════════════════════════════════════
+
 
   /// Get database size (number of items)
   Future<Map<String, int>> getDatabaseSize() async {

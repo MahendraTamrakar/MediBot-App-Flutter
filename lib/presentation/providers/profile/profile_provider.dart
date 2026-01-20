@@ -4,12 +4,6 @@ import 'dart:io';
 import '../../../data/repositories/profile_repository.dart';
 import '../../../data/models/profile/personal_details.dart';
 
-/// Profile Provider - Manages user profile state
-///
-/// Handles:
-/// - Personal details (name, age, gender, etc.)
-/// - Medical profile (allergies, medications, conditions)
-/// - Profile photo upload and deletion
 class ProfileProvider extends ChangeNotifier {
   final ProfileRepository _profileRepository;
 
@@ -20,10 +14,6 @@ class ProfileProvider extends ChangeNotifier {
   String? _errorMessage;
   bool _isUploading = false;
   double _uploadProgress = 0.0;
-
-  // ══════════════════════════════════════════════════════════════════════════
-  // GETTERS
-  // ══════════════════════════════════════════════════════════════════════════
 
   PersonalDetails? get personalDetails => _personalDetails;
 
@@ -43,15 +33,10 @@ class ProfileProvider extends ChangeNotifier {
   String? get address => _personalDetails?.address;
   String? get profilePhotoUrl => _personalDetails?.profilePhotoUrl;
 
- 
 
-    
-  // ══════════════════════════════════════════════════════════════════════════
-  // LOAD PROFILE
-  // ══════════════════════════════════════════════════════════════════════════
 
-  /// Load personal details from backend
-  Future<void> loadPersonalDetails() async {
+  /// Load personal details from backend or cache
+  Future<void> loadPersonalDetails({bool preferCache = false}) async {
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
@@ -59,13 +44,23 @@ class ProfileProvider extends ChangeNotifier {
     try {
       log('📥 Loading personal details');
 
+      // Try cache first if requested
+      if (preferCache) {
+        final repo = _profileRepository;
+        final cached = await repo.getCachedPersonalDetails();
+        if (cached != null) {
+          _personalDetails = cached;
+          _isLoading = false;
+          notifyListeners();
+          return;
+        }
+            }
+
       // Preserve existing photo URL in case backend doesn't return one
       final existingPhotoUrl = _personalDetails?.profilePhotoUrl;
-      
       final newDetails = await _profileRepository.getPersonalDetails();
-      
       // If new details don't have a photo URL but we had one, preserve it
-      if (newDetails != null && newDetails.profilePhotoUrl == null && existingPhotoUrl != null) {
+      if (newDetails.profilePhotoUrl == null && existingPhotoUrl != null) {
         _personalDetails = newDetails.copyWith(profilePhotoUrl: existingPhotoUrl);
       } else {
         _personalDetails = newDetails;
@@ -84,11 +79,6 @@ class ProfileProvider extends ChangeNotifier {
   }
 
 
-  // ══════════════════════════════════════════════════════════════════════════
-  // UPDATE PROFILE
-  // ══════════════════════════════════════════════════════════════════════════
-
-  /// Update personal details
   Future<void> updatePersonalDetails({
     String? email,
     String? fullName,
@@ -119,7 +109,6 @@ class ProfileProvider extends ChangeNotifier {
         address: address,
       );
 
-      // Reload personal details to get updated data
       await loadPersonalDetails();
 
       log('✅ Personal details updated successfully');
@@ -131,7 +120,6 @@ class ProfileProvider extends ChangeNotifier {
       rethrow;
     }
   }
-
   
   Future<void> uploadProfilePhoto(File imageFile) async {
     _isUploading = true;
@@ -176,11 +164,7 @@ class ProfileProvider extends ChangeNotifier {
     }
   }
 
-  // ══════════════════════════════════════════════════════════════════════════
-  // DELETE PROFILE PHOTO
-  // ══════════════════════════════════════════════════════════════════════════
-
-  /// Delete profile photo
+  // Delete profile photo
   Future<void> deleteProfilePhoto() async {
     _isLoading = true;
     _errorMessage = null;
@@ -210,11 +194,8 @@ class ProfileProvider extends ChangeNotifier {
 
 
 
-  // ══════════════════════════════════════════════════════════════════════════
-  // CLEAR
-  // ══════════════════════════════════════════════════════════════════════════
 
-  /// Clear profile data (on logout)
+  // Clear profile data (on logout)
   void clear() {
     _personalDetails = null;
     _isLoading = false;

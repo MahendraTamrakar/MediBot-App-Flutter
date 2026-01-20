@@ -3,12 +3,6 @@ import 'dart:developer' show log;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../data/repositories/auth_repository.dart';
 
-/// Settings Provider - Manages app settings
-///
-/// Handles:
-/// - Theme mode (light/dark/system)
-/// - Language preferences
-/// - Logout functionality
 class SettingsProvider extends ChangeNotifier {
   final SharedPreferences _prefs;
   final AuthRepository _authRepository;
@@ -21,24 +15,12 @@ class SettingsProvider extends ChangeNotifier {
     _loadSettings();
   }
 
-  // ══════════════════════════════════════════════════════════════════════════
-  // STATE
-  // ══════════════════════════════════════════════════════════════════════════
-
   ThemeMode _themeMode = ThemeMode.system;
   String _language = 'en';
   bool _isLoggingOut = false;
 
-  // ══════════════════════════════════════════════════════════════════════════
-  // STORAGE KEYS
-  // ══════════════════════════════════════════════════════════════════════════
-
   static const String _keyThemeMode = 'theme_mode';
   static const String _keyLanguage = 'language';
-
-  // ══════════════════════════════════════════════════════════════════════════
-  // GETTERS
-  // ══════════════════════════════════════════════════════════════════════════
 
   ThemeMode get themeMode => _themeMode;
   String get language => _language;
@@ -48,9 +30,7 @@ class SettingsProvider extends ChangeNotifier {
   bool get isLightMode => _themeMode == ThemeMode.light;
   bool get isSystemMode => _themeMode == ThemeMode.system;
 
-  // ══════════════════════════════════════════════════════════════════════════
-  // LOAD SETTINGS
-  // ══════════════════════════════════════════════════════════════════════════
+
 
   void _loadSettings() {
     log('📥 Loading settings');
@@ -59,15 +39,8 @@ class SettingsProvider extends ChangeNotifier {
     final themeModeStr = _prefs.getString(_keyThemeMode) ?? 'system';
     _themeMode = _parseThemeMode(themeModeStr);
 
-    // Language
-    _language = _prefs.getString(_keyLanguage) ?? 'en';
-
     log('✅ Settings loaded - Theme: $_themeMode, Language: $_language');
   }
-
-  // ══════════════════════════════════════════════════════════════════════════
-  // THEME MODE
-  // ══════════════════════════════════════════════════════════════════════════
 
   /// Set theme mode
   Future<void> setThemeMode(ThemeMode mode) async {
@@ -108,37 +81,14 @@ class SettingsProvider extends ChangeNotifier {
     }
   }
 
-  // ══════════════════════════════════════════════════════════════════════════
-  // LANGUAGE
-  // ══════════════════════════════════════════════════════════════════════════
-
-  /// Set language
-  Future<void> setLanguage(String languageCode) async {
-    _language = languageCode;
-    await _prefs.setString(_keyLanguage, languageCode);
-    log('🌐 Language set to: $languageCode');
-    notifyListeners();
-  }
-
-  // ══════════════════════════════════════════════════════════════════════════
-  // LOGOUT
-  // ══════════════════════════════════════════════════════════════════════════
-
-  /// Logout user
-  ///
-  /// Clears all user data and returns to login screen
   Future<bool> logout() async {
     _isLoggingOut = true;
     notifyListeners();
 
     try {
       log('🚪 Logging out...');
-
-      // Call auth repository logout
       await _authRepository.signOut();
 
-      // Clear settings (optional - you can keep theme/language preferences)
-      // await _prefs.clear();
 
       log('✅ Logout successful');
       _isLoggingOut = false;
@@ -154,11 +104,6 @@ class SettingsProvider extends ChangeNotifier {
     }
   }
 
-  // ══════════════════════════════════════════════════════════════════════════
-  // RESET TO DEFAULTS
-  // ══════════════════════════════════════════════════════════════════════════
-
-  /// Reset settings to defaults (but keep user logged in)
   Future<void> resetToDefaults() async {
     _themeMode = ThemeMode.system;
     _language = 'en';

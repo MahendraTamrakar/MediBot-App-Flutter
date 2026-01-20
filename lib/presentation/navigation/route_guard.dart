@@ -40,15 +40,12 @@ class AuthGuard extends StatelessWidget {
             ),
           );
         }
-
-        // Authenticated → show protected content
         return child;
       },
     );
   }
 }
 
-/// Guest guard (redirects authenticated users away from auth screens)
 
 class GuestGuard extends StatelessWidget {
   final Widget child;
@@ -77,9 +74,6 @@ class GuestGuard extends StatelessWidget {
     );
   }
 }
-
-/// Email verification guard
-
 class EmailVerificationGuard extends StatelessWidget {
   final Widget child;
 
@@ -94,7 +88,7 @@ class EmailVerificationGuard extends StatelessWidget {
       builder: (context, authProvider, _) {
         final user = authProvider.currentUser;
 
-        // Email not verified → show verification screen
+ 
         if (user != null && !user.emailVerified) {
           return Scaffold(
             appBar: AppBar(title: const Text('Email Verification Required')),
@@ -126,7 +120,6 @@ class EmailVerificationGuard extends StatelessWidget {
                     const SizedBox(height: 32),
                     ElevatedButton(
                       onPressed: () {
-                        // TODO: Resend verification email
                       },
                       child: const Text('Resend Verification Email'),
                     ),
@@ -143,8 +136,6 @@ class EmailVerificationGuard extends StatelessWidget {
             ),
           );
         }
-
-        // Email verified → show protected content
         return child;
       },
     );

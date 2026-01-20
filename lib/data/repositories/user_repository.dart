@@ -1,12 +1,6 @@
 import '../data_sources/remote/user_api_service.dart';
 import '../data_sources/local/secure_storage_service.dart';
 
-/// User repository - Business logic for user account operations
-/// 
-/// Coordinates:
-/// - User API service (remote data)
-/// - Secure storage (local data)
-/// - Account management operations
 class UserRepository {
   final UserApiService _userApiService;
   final SecureStorageService _secureStorage;
@@ -32,13 +26,6 @@ class UserRepository {
     }
   }
 
-  // ══════════════════════════════════════════════════════════════════════════
-  // HEALTH CHECK
-  // ══════════════════════════════════════════════════════════════════════════
-
-  /// Check if API is healthy and responsive
-  /// 
-  /// Returns true if API is healthy
   Future<bool> checkApiHealth() async {
     try {
       final health = await _userApiService.healthCheck();
@@ -49,10 +36,7 @@ class UserRepository {
     }
   }
 
-  /// Get API version
-  /// 
-  /// Returns the API version string
-  Future<String?> getApiVersion() async {
+/*   Future<String?> getApiVersion() async {
     try {
       final health = await _userApiService.healthCheck();
 
@@ -60,13 +44,8 @@ class UserRepository {
     } catch (e) {
       return null;
     }
-  }
+  } */
 
-  // ══════════════════════════════════════════════════════════════════════════
-  // USER INFO
-  // ══════════════════════════════════════════════════════════════════════════
-
-  /// Get current user UID
   Future<String?> getCurrentUserId() async {
     return await _secureStorage.getUid();
   }

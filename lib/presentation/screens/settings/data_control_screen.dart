@@ -58,10 +58,6 @@ class DataControlScreen extends StatelessWidget {
           const SizedBox(height: 12),
           SettingCard(
             children: [
-              // ════════════════════════════════════════════════════════════════
-              // CLEAR ALL CHAT HISTORY
-              // ════════════════════════════════════════════════════════════════
-              
               SettingTile(
                 icon: Icons.cleaning_services_rounded,
                 title: 'Clear All Chat History',

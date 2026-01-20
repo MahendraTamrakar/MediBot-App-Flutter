@@ -21,8 +21,8 @@ class ChatScreen extends StatefulWidget {
 }
 
 class _ChatScreenState extends State<ChatScreen> {
-    bool _drawerOpening = false;
-    int _prevMessageCount = 0;
+  bool _drawerOpening = false;
+  int _prevMessageCount = 0;
   final ScrollController _scrollController = ScrollController();
   File? _attachedFile;
 

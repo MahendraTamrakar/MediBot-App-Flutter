@@ -12,29 +12,7 @@ import 'package:medibot/presentation/screens/settings/data_control_screen.dart';
 import 'package:medibot/presentation/screens/settings/edit_profile_screen.dart';
 import 'package:medibot/presentation/screens/settings/setting_screen.dart';
 
-/// App Router - Centralized route management
-///
-/// Defines all app routes with proper navigation guards.
-///
-/// Usage:
-/// ```dart
-/// // In MaterialApp
-/// onGenerateRoute: AppRouter.generateRoute,
-///
-/// // Navigate to route
-/// Navigator.pushNamed(context, AppRoutes.home);
-///
-/// // Navigate with arguments
-/// Navigator.pushNamed(
-///   context,
-///   AppRoutes.chatDetail,
-///   arguments: sessionId,
-/// );
-/// ```
 class AppRouter {
-  // ══════════════════════════════════════════════════════════════════════════
-  // ROUTE GENERATION
-  // ══════════════════════════════════════════════════════════════════════════
 
   static Route<dynamic> generateRoute(RouteSettings settings) {
     log('🧭 Navigating to: ${settings.name}');
@@ -46,10 +24,7 @@ class AppRouter {
           settings: settings,
         );
 
-      // ══════════════════════════════════════════════════════════════════════
-      // AUTHENTICATION (Public Routes)
-      // ══════════════════════════════════════════════════════════════════════
-
+      
       case AppRoutes.signIn:
         return MaterialPageRoute(
           builder: (_) => const SignInScreen(),
@@ -96,65 +71,18 @@ class AppRouter {
 
       
       case AppRoutes.dataControl:
-       
-        
         return MaterialPageRoute(
           builder: (_) => AuthGuard(
             child: DataControlScreen(),
           ),
           settings: settings,
         );
-      /*
-      case AppRoutes.chatHistory:
-        return MaterialPageRoute(
-          builder: (_) => const AuthGuard(child: ChatHistoryScreen()),
-          settings: settings,
-        );
-
-      case AppRoutes.profile:
-        return MaterialPageRoute(
-          builder: (_) => const AuthGuard(child: ProfileScreen()),
-          settings: settings,
-        );
-
-      case AppRoutes.editProfile:
-        return MaterialPageRoute(
-          builder: (_) => const AuthGuard(child: EditProfileScreen()),
-          settings: settings,
-        );
-
-
-      case AppRoutes.reports:
-        return MaterialPageRoute(
-          builder: (_) => const AuthGuard(child: ReportsScreen()),
-          settings: settings,
-        );
-
-      case AppRoutes.reportDetail:
-        // Get report ID from arguments
-        final reportId = settings.arguments as String?;
-        if (reportId == null) {
-          return _errorRoute(settings, 'Report ID is required');
-        }
-        return MaterialPageRoute(
-          builder: (_) => AuthGuard(
-            child: ReportDetailScreen(reportId: reportId),
-          ),
-          settings: settings,
-        ); */
-
-      // ══════════════════════════════════════════════════════════════════════
-      // ERROR - ROUTE NOT FOUND
-      // ══════════════════════════════════════════════════════════════════════
 
       default:
         return _errorRoute(settings, 'Route not found: ${settings.name}');
     }
   }
 
-  // ══════════════════════════════════════════════════════════════════════════
-  // ERROR ROUTE
-  // ══════════════════════════════════════════════════════════════════════════
 
   static Route<dynamic> _errorRoute(RouteSettings settings, String message) {
     return MaterialPageRoute(
@@ -190,17 +118,7 @@ class AppRouter {
   }
 }
 
-// ═══════════════════════════════════════════════════════════════════════════════
-// APP ROUTES - String Constants
-// ═══════════════════════════════════════════════════════════════════════════════
 
-/// Route names as string constants
-///
-/// Benefits:
-/// - Type safety (no typos)
-/// - Easy refactoring
-/// - Auto-complete support
-/// - Single source of truth
 class AppRoutes {
   static const String onboarding = '/onboarding';
 
@@ -216,8 +134,7 @@ class AppRoutes {
   static const String editProfile = '/edit-profile';
   static const String settings = '/settings';
   static const String dataControl = '/data-control';
-  static const String reports = '/reports';
-  static const String reportDetail = '/report-detail';
+
 
   /// Check if route requires authentication
   static bool isProtectedRoute(String route) {

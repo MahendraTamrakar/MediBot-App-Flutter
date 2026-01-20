@@ -1,9 +1,13 @@
 import 'dart:developer' show log;
 
 import 'package:flutter/foundation.dart';
+import 'package:provider/provider.dart';
 import 'dart:async';
 import 'dart:io';
 import '../../../data/repositories/chat_repository.dart';
+import '../../../data/data_sources/local/database_service.dart';
+import '../../../services/connectivity_service.dart';
+import 'package:flutter/material.dart';
 import '../../../data/models/chat/chat_message.dart';
 import '../../../data/models/chat/chat_session.dart';
 
@@ -11,10 +15,6 @@ class ChatProvider extends ChangeNotifier {
   final ChatRepository _chatRepository;
 
   ChatProvider(this._chatRepository);
-
-  // ══════════════════════════════════════════════════════════════════════════
-  // STATE
-  // ══════════════════════════════════════════════════════════════════════════
 
   List<ChatMessage> _messages = [];
   List<ChatSession> _chatSessions = [];
@@ -24,9 +24,6 @@ class ChatProvider extends ChangeNotifier {
   String? _currentSessionId;
   bool _sessionsLoading = false;
 
-  // ══════════════════════════════════════════════════════════════════════════
-  // GETTERS
-  // ══════════════════════════════════════════════════════════════════════════
 
   List<ChatMessage> get messages => _messages;
   List<ChatSession> get chatSessions => _chatSessions;
@@ -49,10 +46,6 @@ class ChatProvider extends ChangeNotifier {
       return null;
     }
   }
-
-  // ══════════════════════════════════════════════════════════════════════════
-  // SEND MESSAGE (NON-STREAMING)
-  // ══════════════════════════════════════════════════════════════════════════
 
   Future<void> sendMessage(String content) async {
     if (content.trim().isEmpty) return;
@@ -129,10 +122,6 @@ class ChatProvider extends ChangeNotifier {
     }
   }
 
-  // ══════════════════════════════════════════════════════════════════════════
-  // SEND MESSAGE WITH FILE ATTACHMENT
-  // ══════════════════════════════════════════════════════════════════════════
-
   Future<void> sendMessageWithFile(String content, File file) async {
     // Add user message with file indicator
     final userMessage = ChatMessage(
@@ -190,20 +179,12 @@ class ChatProvider extends ChangeNotifier {
     }
   }
 
-  // ══════════════════════════════════════════════════════════════════════════
-  // STOP/CANCEL REQUEST
-  // ══════════════════════════════════════════════════════════════════════════
-
   Future<void> stopStreaming() async {
     log('🛑 Cancelling request');
     _isCancelled = true;
     _isTyping = false;
     notifyListeners();
   }
-
-  // ══════════════════════════════════════════════════════════════════════════
-  // LOAD CHAT SESSION
-  // ══════════════════════════════════════════════════════════════════════════
 
   Future<void> loadChatSession(String sessionId) async {
     try {
@@ -224,10 +205,6 @@ class ChatProvider extends ChangeNotifier {
     }
   }
 
-  // ══════════════════════════════════════════════════════════════════════════
-  // NEW CONVERSATION
-  // ══════════════════════════════════════════════════════════════════════════
-
   void newConversation() {
     _messages.clear();
     _errorMessage = null;
@@ -235,10 +212,6 @@ class ChatProvider extends ChangeNotifier {
     _isTyping = false;
     notifyListeners();
   }
-
-  // ══════════════════════════════════════════════════════════════════════════
-  // GET CHAT SESSIONS LIST
-  // ══════════════════════════════════════════════════════════════════════════
 
   Future<List<ChatSession>> getChatSessions() async {
     try {
@@ -250,16 +223,39 @@ class ChatProvider extends ChangeNotifier {
   }
 
   /// Fetch and update chat sessions list
-  Future<void> fetchChatSessions() async {
+  Future<void> fetchChatSessions({BuildContext? context}) async {
     _sessionsLoading = true;
     notifyListeners();
-    
+
+    bool isConnected = true;
+    if (context != null) {
+      try {
+        final connectivityService = Provider.of<ConnectivityService>(context, listen: false);
+        isConnected = await connectivityService.hasConnection();
+      } catch (_) {
+        isConnected = true; // fallback: assume online if service not available
+      }
+    }
+
     try {
-      _chatSessions = await _chatRepository.getChatSessions();
+      if (isConnected) {
+        _chatSessions = await _chatRepository.getChatSessions();
+      } else {
+        // Offline: load only session metadata from Hive
+        _chatSessions = await DatabaseService().getChatSessions();
+        // Remove messages if present (just in case)
+        _chatSessions = _chatSessions.map((s) => ChatSession(
+          sessionId: s.sessionId,
+          title: s.title,
+          createdAt: s.createdAt,
+          updatedAt: s.updatedAt,
+          messages: null,
+        )).toList();
+      }
     } catch (e) {
       print('❌ Failed to fetch chat sessions: $e');
     }
-    
+
     _sessionsLoading = false;
     notifyListeners();
   }
@@ -299,10 +295,6 @@ class ChatProvider extends ChangeNotifier {
     }
   }
 
-  // ══════════════════════════════════════════════════════════════════════════
-  // DELETE CHAT SESSION
-  // ══════════════════════════════════════════════════════════════════════════
-
   Future<void> deleteChatSession(String sessionId) async {
     try {
       await _chatRepository.deleteChatSession(sessionId);
@@ -317,17 +309,12 @@ class ChatProvider extends ChangeNotifier {
     }
   }
 
-  // ══════════════════════════════════════════════════════════════════════════
-  // END CHAT (call when leaving chat screen)
-  // ══════════════════════════════════════════════════════════════════════════
-
   Future<void> endChat() async {
     try {
       await _chatRepository.endChat();
       print('✅ Chat ended and profile updated');
     } catch (e) {
       print('⚠️ Failed to end chat: $e');
-      // Don't throw - this is a background operation
     }
   }
 }
